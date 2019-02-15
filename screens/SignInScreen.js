@@ -50,6 +50,7 @@ export default class SignInScreen extends React.Component {
       <View style={styles.container}>
         {/* Go ahead and delete ExpoLinksView and replace it with your
          * content, we just wanted to provide you with some helpful links */}
+        <Text style={styles.title}>Uber Client</Text>
         <Text style={styles.header}>Welcome</Text>
         <Button
           onPress={() => this.handleUberLogin()}
@@ -63,8 +64,15 @@ export default class SignInScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 100,
     backgroundColor: '#fff',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 60,
+    textAlign: 'center',
+    fontWeight: '700',
+    marginBottom: 100,
+    textDecorationLine: 'underline',
   },
   header: {
     fontSize: 30,

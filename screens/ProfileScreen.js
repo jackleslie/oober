@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   profileEmail: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '300',
   },
   profileVerified: {
