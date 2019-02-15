@@ -12,7 +12,10 @@
   },
   "dependencies": {
     "@expo/samples": "2.1.1",
+    "axios": "^0.18.0",
     "expo": "^32.0.0",
+    "install": "^0.12.2",
+    "npm": "^6.8.0",
     "prettier": "^1.16.4",
     "react": "16.5.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
