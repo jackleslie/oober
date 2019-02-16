@@ -1,6 +1,13 @@
 import React from 'react'
 import axios from 'axios'
-import { StyleSheet, Text, Button, View, AsyncStorage } from 'react-native'
+import {
+  StyleSheet,
+  Text,
+  Button,
+  View,
+  AsyncStorage,
+  Image,
+} from 'react-native'
 import { AuthSession } from 'expo'
 
 export default class SignInScreen extends React.Component {
@@ -48,14 +55,20 @@ export default class SignInScreen extends React.Component {
 
     return (
       <View style={styles.container}>
-        {/* Go ahead and delete ExpoLinksView and replace it with your
-         * content, we just wanted to provide you with some helpful links */}
-        <Text style={styles.title}>Uber Client</Text>
-        <Text style={styles.header}>Welcome</Text>
-        <Button
-          onPress={() => this.handleUberLogin()}
-          title="Sign In / Create Account"
-        />
+        <View style={styles.main}>
+          <Image
+            style={styles.logo}
+            source={require('../assets/images/Logo.png')}
+          />
+          <Text style={styles.title}>Oober</Text>
+        </View>
+        <View style={styles.welcome}>
+          <Text style={styles.header}>Welcome</Text>
+          <Button
+            onPress={() => this.handleUberLogin()}
+            title="Sign In / Create Account"
+          />
+        </View>
       </View>
     )
   }
@@ -65,18 +78,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   title: {
-    fontSize: 60,
+    fontSize: 50,
+    fontWeight: '600',
     textAlign: 'center',
-    fontWeight: '700',
-    marginBottom: 100,
-    textDecorationLine: 'underline',
   },
   header: {
     fontSize: 30,
-    textAlign: 'center',
     fontWeight: '500',
+    textAlign: 'center',
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: 10,
   },
 })

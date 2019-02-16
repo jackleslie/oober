@@ -9,6 +9,7 @@ import {
   Button,
   Image,
   Platform,
+  ActivityIndicator,
 } from 'react-native'
 
 import { Icon } from 'expo'
@@ -49,7 +50,7 @@ export default class ProfileScreen extends React.Component {
   render() {
     return (
       <ScrollView style={styles.container}>
-        {this.state.userInfo && (
+        {this.state.userInfo ? (
           <View>
             <View style={styles.profileHeader}>
               <Image
@@ -93,9 +94,11 @@ export default class ProfileScreen extends React.Component {
                 )}
               </View>
             </View>
-            <Button title="Sign Out" onPress={this._signOutAsync} />
           </View>
+        ) : (
+          <ActivityIndicator size="large" />
         )}
+        <Button title="Sign Out" onPress={this._signOutAsync} />
       </ScrollView>
     )
   }

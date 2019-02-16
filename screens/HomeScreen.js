@@ -26,7 +26,7 @@ export default class HomeScreen extends React.Component {
     longitude: null,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
-    granted: null,
+    address: null,
     refreshing: false,
   }
 
@@ -47,7 +47,15 @@ export default class HomeScreen extends React.Component {
         this.setState({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          granted: true,
+        })
+        return Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        })
+      })
+      .then(results => {
+        this.setState({
+          address: results[0].name,
         })
       })
       .catch(console.log)
@@ -55,6 +63,10 @@ export default class HomeScreen extends React.Component {
 
   render() {
     const { navigate } = this.props.navigation
+    let location = {
+      latitude: this.state.latitude,
+      longitude: this.state.longitude,
+    }
     return this.state.latitude ? (
       <MapView
         style={{ flex: 1 }}
@@ -64,7 +76,13 @@ export default class HomeScreen extends React.Component {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
-      />
+      >
+        <MapView.Marker
+          coordinate={location}
+          title={'Current Location'}
+          description={this.state.address}
+        />
+      </MapView>
     ) : (
       <ScrollView
         contentContainerStyle={styles.container}
