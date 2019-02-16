@@ -139,6 +139,6 @@ const styles = StyleSheet.create({
   },
   profileVerifiedText: {
     marginLeft: 5,
-    fontWeight: '300',
+    fontWeight: '400',
   },
 })

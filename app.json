@@ -19,6 +19,8 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "description": "CS3301 Component Technology, Practical 1: Android App Development",
+    "githubUrl": "https://github.com/jackleslie/android-uber-client"
   }
 }
