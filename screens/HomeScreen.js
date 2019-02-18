@@ -14,6 +14,7 @@ import {
   AsyncStorage,
   Dimensions,
   ActivityIndicator,
+  Modal,
 } from 'react-native'
 import { WebBrowser, MapView, Location } from 'expo'
 
@@ -33,6 +34,7 @@ export default class HomeScreen extends React.Component {
     address: null,
     refreshing: false,
     products: null,
+    requestEstimate: null,
   }
 
   static navigationOptions = {
@@ -98,12 +100,15 @@ export default class HomeScreen extends React.Component {
         product_id: product_id,
         start_latitude: this.state.latitude,
         start_longitude: this.state.longitude,
-        end_latitude: this.state.latitude + 0.0001,
-        end_longitude: this.state.longitude + 0.0001,
+        end_latitude: this.state.latitude - 0.05,
+        end_longitude: this.state.longitude - 0.05,
       },
     })
       .then(response => {
-        console.log(JSON.stringify(response.data))
+        console.log(response.data)
+        this.setState({
+          requestEstimate: response.data,
+        })
       })
       .catch(console.log)
   }
@@ -132,6 +137,39 @@ export default class HomeScreen extends React.Component {
             description={this.state.address}
           />
         </MapView>
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={this.state.requestEstimate !== null}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.')
+          }}
+        >
+          <View style={styles.estimateModalView}>
+            <View>
+              <Text style={styles.estimateModalText}>
+                {this.state.requestEstimate &&
+                  this.state.requestEstimate.estimate.display}
+              </Text>
+              <Text style={styles.estimateModalText}>
+                {this.state.requestEstimate &&
+                  `${this.state.requestEstimate.trip.distance_estimate} ${
+                    this.state.requestEstimate.trip.distance_unit
+                  }`}
+              </Text>
+              <Button
+                style={styles.productButton}
+                title="Request"
+                onPress={() => console.log(1)}
+              />
+              <Button
+                style={styles.productButton}
+                title="Cancel"
+                onPress={() => this.setState({ requestEstimate: null })}
+              />
+            </View>
+          </View>
+        </Modal>
         <ScrollView style={styles.productContainer} pagingEnabled horizontal>
           {this.state.products ? (
             this.state.products.length > 0 ? (
@@ -153,7 +191,7 @@ export default class HomeScreen extends React.Component {
                   </Text>
                   <Button
                     style={styles.productButton}
-                    title="Request"
+                    title="Select"
                     onPress={() =>
                       this._handleUberRequestAsync(product.product_id)
                     }
@@ -244,5 +282,13 @@ const styles = StyleSheet.create({
   },
   productButton: {
     marginTop: -15,
+  },
+  estimateModalView: {
+    paddingVertical: 100,
+    paddingHorizontal: 20,
+  },
+  estimateModalText: {
+    textAlign: 'center',
+    fontSize: 30,
   },
 })
