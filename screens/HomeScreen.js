@@ -35,6 +35,7 @@ export default class HomeScreen extends React.Component {
     refreshing: false,
     products: null,
     requestEstimate: null,
+    request: null,
   }
 
   static navigationOptions = {
@@ -44,7 +45,7 @@ export default class HomeScreen extends React.Component {
   _bootstrapAsync = async () => {
     const userToken = await AsyncStorage.getItem('userToken')
     axios
-      .get(`https://api.uber.com/v1.2/products`, {
+      .get(`https://sandbox-api.uber.com/v1.2/products`, {
         params: {
           latitude: this.state.latitude,
           longitude: this.state.longitude,
@@ -88,7 +89,7 @@ export default class HomeScreen extends React.Component {
       .catch(console.log)
   }
 
-  _handleUberRequestAsync = async product_id => {
+  _handleUberSelectAsync = async product_id => {
     const userToken = await AsyncStorage.getItem('userToken')
     axios({
       method: 'post',
@@ -105,12 +106,71 @@ export default class HomeScreen extends React.Component {
       },
     })
       .then(response => {
+        response.data.product_id = product_id
         console.log(response.data)
         this.setState({
           requestEstimate: response.data,
         })
       })
       .catch(console.log)
+  }
+
+  _handleUberRequestAsync = async (product_id, fare_id) => {
+    const userToken = await AsyncStorage.getItem('userToken')
+    axios({
+      method: 'post',
+      url: 'https://sandbox-api.uber.com/v1.2/requests',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+      data: {
+        fare_id: fare_id,
+        product_id: product_id,
+        start_latitude: this.state.latitude,
+        start_longitude: this.state.longitude,
+        end_latitude: this.state.latitude - 0.05,
+        end_longitude: this.state.longitude - 0.05,
+      },
+    }).then(response => {
+      console.log(response.data)
+      this.setState({
+        requestEstimate: null,
+        request: response.data,
+      })
+      return axios({
+        method: 'put',
+        url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
+          response.data.request_id
+        }`,
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+        data: {
+          status: 'accepted',
+        },
+      }).then(response => console.log(response.data))
+    })
+  }
+
+  _handleUberRequestReloadAsync = async request_id => {
+    const userToken = await AsyncStorage.getItem('userToken')
+    axios
+      .get(
+        `https://sandbox-api.uber.com/v1.2/requests/${
+          this.state.request.request_id
+        }`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      )
+      .then(response => {
+        console.log(response.data)
+        this.setState({
+          request: response.data,
+        })
+      })
   }
 
   render() {
@@ -138,66 +198,94 @@ export default class HomeScreen extends React.Component {
           />
         </MapView>
         <Modal
-          animationType="slide"
+          animationType="fade"
           transparent={false}
           visible={this.state.requestEstimate !== null}
           onRequestClose={() => {
             Alert.alert('Modal has been closed.')
           }}
+          presentationStyle="overFullScreen"
+          transparent
         >
           <View style={styles.estimateModalView}>
             <View>
-              <Text style={styles.estimateModalText}>
+              <Text style={styles.estimateModalTitle}>
                 {this.state.requestEstimate &&
-                  this.state.requestEstimate.estimate.display}
+                  `${this.state.requestEstimate.fare.display} | ${
+                    this.state.requestEstimate.trip.distance_estimate
+                  } ${this.state.requestEstimate.trip.distance_unit}(s)`}
               </Text>
               <Text style={styles.estimateModalText}>
                 {this.state.requestEstimate &&
-                  `${this.state.requestEstimate.trip.distance_estimate} ${
-                    this.state.requestEstimate.trip.distance_unit
-                  }`}
+                  `Pickup ETA ${
+                    this.state.requestEstimate.pickup_estimate
+                  } minutes`}
               </Text>
-              <Button
-                style={styles.productButton}
-                title="Request"
-                onPress={() => console.log(1)}
-              />
-              <Button
-                style={styles.productButton}
-                title="Cancel"
-                onPress={() => this.setState({ requestEstimate: null })}
-              />
+              <View style={styles.estimateModalButtonRow}>
+                <Button
+                  style={styles.productButton}
+                  title="Request"
+                  onPress={() =>
+                    this._handleUberRequestAsync(
+                      this.state.requestEstimate.product_id,
+                      this.state.requestEstimate.fare.fare_id
+                    )
+                  }
+                />
+                <Button
+                  style={styles.productButton}
+                  title="Cancel"
+                  onPress={() => this.setState({ requestEstimate: null })}
+                />
+              </View>
             </View>
           </View>
         </Modal>
         <ScrollView style={styles.productContainer} pagingEnabled horizontal>
           {this.state.products ? (
             this.state.products.length > 0 ? (
-              this.state.products.map(product => (
-                <View
-                  key={product.product_id}
-                  style={[styles.product, { width: screenWidth }]}
-                >
-                  <Image
-                    source={{ uri: product.image }}
-                    style={styles.productImage}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.productTitle}>
-                    {product.display_name}
-                  </Text>
-                  <Text style={styles.productDescription}>
-                    {product.description}
-                  </Text>
+              !this.state.request ? (
+                this.state.products.map(product => (
+                  <View
+                    key={product.product_id}
+                    style={[styles.product, { width: screenWidth }]}
+                  >
+                    <Image
+                      source={{ uri: product.image }}
+                      style={styles.productImage}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.productTitle}>
+                      {product.display_name}
+                    </Text>
+                    <Text style={styles.productDescription}>
+                      {product.description}
+                    </Text>
+                    <Button
+                      style={styles.productButton}
+                      title="Select"
+                      onPress={() =>
+                        this._handleUberSelectAsync(product.product_id)
+                      }
+                    />
+                  </View>
+                ))
+              ) : (
+                <View style={[styles.requestContainer, { width: screenWidth }]}>
+                  <Text style={styles.productTitle}>Request Active</Text>
                   <Button
-                    style={styles.productButton}
-                    title="Select"
+                    title="Reload"
                     onPress={() =>
-                      this._handleUberRequestAsync(product.product_id)
+                      this._handleUberRequestReloadAsync(
+                        this.state.request.request_id
+                      )
                     }
                   />
+                  <Text style={styles.productTitle}>
+                    {this.state.request.status}
+                  </Text>
                 </View>
-              ))
+              )
             ) : (
               <View style={[styles.product, { width: screenWidth }]}>
                 <Text style={styles.productTitle}>No drivers available</Text>
@@ -284,11 +372,25 @@ const styles = StyleSheet.create({
     marginTop: -15,
   },
   estimateModalView: {
-    paddingVertical: 100,
+    paddingTop: 60,
+    paddingBottom: 10,
     paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+  },
+  estimateModalTitle: {
+    textAlign: 'center',
+    fontSize: 30,
   },
   estimateModalText: {
     textAlign: 'center',
-    fontSize: 30,
+    fontSize: 18,
+  },
+  estimateModalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  requestContainer: {
+    paddingTop: 20,
   },
 })
