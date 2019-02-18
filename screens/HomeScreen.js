@@ -19,23 +19,24 @@ import {
 import { WebBrowser, MapView, Location } from 'expo'
 
 import { MonoText } from '../components/StyledText'
+import Profile from '../components/Profile'
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props)
     this._getLocationAsync()
-  }
-
-  state = {
-    latitude: null,
-    longitude: null,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-    address: null,
-    refreshing: false,
-    products: null,
-    requestEstimate: null,
-    request: null,
+    this.state = {
+      latitude: null,
+      longitude: null,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+      address: null,
+      refreshing: false,
+      products: null,
+      requestEstimate: null,
+      request: null,
+      driver: null,
+    }
   }
 
   static navigationOptions = {
@@ -173,6 +174,22 @@ export default class HomeScreen extends React.Component {
       })
   }
 
+  _handleUberCancelRequestAsync = async () => {
+    const userToken = await AsyncStorage.getItem('userToken')
+    axios({
+      method: 'delete',
+      url: 'https://sandbox-api.uber.com/v1.2/requests/current',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }).then(() => {
+      this.setState({
+        requestEstimate: null,
+        request: null,
+      })
+    })
+  }
+
   render() {
     const { navigate } = this.props.navigation
     let location = {
@@ -211,7 +228,7 @@ export default class HomeScreen extends React.Component {
             <View>
               <Text style={styles.estimateModalTitle}>
                 {this.state.requestEstimate &&
-                  `${this.state.requestEstimate.fare.display} | ${
+                  `${this.state.requestEstimate.fare.display} • ${
                     this.state.requestEstimate.trip.distance_estimate
                   } ${this.state.requestEstimate.trip.distance_unit}(s)`}
               </Text>
@@ -221,7 +238,7 @@ export default class HomeScreen extends React.Component {
                     this.state.requestEstimate.pickup_estimate
                   } minutes`}
               </Text>
-              <View style={styles.estimateModalButtonRow}>
+              <View style={styles.buttonRow}>
                 <Button
                   style={styles.productButton}
                   title="Request"
@@ -271,20 +288,58 @@ export default class HomeScreen extends React.Component {
                   </View>
                 ))
               ) : (
-                <View style={[styles.requestContainer, { width: screenWidth }]}>
-                  <Text style={styles.productTitle}>Request Active</Text>
-                  <Button
-                    title="Reload"
-                    onPress={() =>
-                      this._handleUberRequestReloadAsync(
-                        this.state.request.request_id
-                      )
-                    }
-                  />
-                  <Text style={styles.productTitle}>
-                    {this.state.request.status}
-                  </Text>
-                </View>
+                <>
+                  <View
+                    style={[styles.requestContainer, { width: screenWidth }]}
+                  >
+                    <Text style={styles.productTitle}>
+                      Request {this.state.request.status}
+                    </Text>
+                    <View style={styles.buttonRow}>
+                      <Button
+                        title="Reload"
+                        onPress={() =>
+                          this._handleUberRequestReloadAsync(
+                            this.state.request.request_id
+                          )
+                        }
+                      />
+                      <Button
+                        title="Cancel"
+                        onPress={this._handleUberCancelRequestAsync}
+                      />
+                    </View>
+                  </View>
+                  {this.state.request.driver && (
+                    <View
+                      style={[styles.requestContainer, { width: screenWidth }]}
+                    >
+                      <Profile
+                        picture={this.state.request.driver.picture_url}
+                        name={this.state.request.driver.name}
+                        contact={this.state.request.driver.phone_number}
+                        verified
+                        verifiedText={this.state.request.driver.rating.toString()}
+                      />
+                      <View style={styles.vehicleContainer}>
+                        <Image
+                          source={{
+                            uri: this.state.request.vehicle.picture_url,
+                          }}
+                          style={styles.vehicleImage}
+                        />
+                        <Text style={styles.vehicleText}>
+                          {this.state.request.vehicle.make}{' '}
+                          {this.state.request.vehicle.model}
+                          {'\n'}
+                          <Text style={styles.vehicleLicensePlate}>
+                            {this.state.request.vehicle.license_plate}
+                          </Text>
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </>
               )
             ) : (
               <View style={[styles.product, { width: screenWidth }]}>
@@ -331,8 +386,6 @@ const styles = StyleSheet.create({
   },
   productContainer: {
     flex: 1,
-    borderTopColor: 'rgba(0,0,0,0.2)',
-    borderTopWidth: 1,
     padding: 8,
   },
   productTitle: {
@@ -353,6 +406,10 @@ const styles = StyleSheet.create({
   },
   link: {
     fontWeight: '600',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   product: {
     flex: 1,
@@ -376,7 +433,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingHorizontal: 20,
     backgroundColor: '#fff',
-    borderRadius: 20,
   },
   estimateModalTitle: {
     textAlign: 'center',
@@ -386,11 +442,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
   },
-  estimateModalButtonRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
   requestContainer: {
-    paddingTop: 20,
+    flex: 1,
+    flexDirection: 'row',
+    paddingTop: 5,
+    justifyContent: 'space-around',
+  },
+  vehicleContainer: {
+    flex: 1,
+    paddingLeft: 5,
+    paddingRight: 15,
+  },
+  vehicleImage: {
+    flex: 1,
+  },
+  vehicleText: {
+    flex: 1,
+  },
+  vehicleLicensePlate: {
+    backgroundColor: '#fbce30',
+    fontWeight: '900',
   },
 })
