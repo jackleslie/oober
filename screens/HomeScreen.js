@@ -86,6 +86,28 @@ export default class HomeScreen extends React.Component {
       .catch(console.log)
   }
 
+  _handleUberRequestAsync = async product_id => {
+    const userToken = await AsyncStorage.getItem('userToken')
+    axios({
+      method: 'post',
+      url: 'https://sandbox-api.uber.com/v1.2/requests/estimate',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+      data: {
+        product_id: product_id,
+        start_latitude: this.state.latitude,
+        start_longitude: this.state.longitude,
+        end_latitude: this.state.latitude + 0.0001,
+        end_longitude: this.state.longitude + 0.0001,
+      },
+    })
+      .then(response => {
+        console.log(JSON.stringify(response.data))
+      })
+      .catch(console.log)
+  }
+
   render() {
     const { navigate } = this.props.navigation
     let location = {
@@ -129,6 +151,13 @@ export default class HomeScreen extends React.Component {
                   <Text style={styles.productDescription}>
                     {product.description}
                   </Text>
+                  <Button
+                    style={styles.productButton}
+                    title="Request"
+                    onPress={() =>
+                      this._handleUberRequestAsync(product.product_id)
+                    }
+                  />
                 </View>
               ))
             ) : (
@@ -139,7 +168,7 @@ export default class HomeScreen extends React.Component {
           ) : (
             <ActivityIndicator
               size="large"
-              style={[styles.product, { width: screenWidth }]}
+              style={[styles.productIndicator, { width: screenWidth }]}
             />
           )}
         </ScrollView>
@@ -178,14 +207,19 @@ const styles = StyleSheet.create({
     flex: 1,
     borderTopColor: 'rgba(0,0,0,0.2)',
     borderTopWidth: 1,
+    padding: 8,
   },
   productTitle: {
     fontSize: 24,
     fontWeight: '500',
     textAlign: 'center',
+    marginTop: -16,
   },
   productDescription: {
     textAlign: 'center',
+    fontWeight: '100',
+    fontStyle: 'italic',
+    fontSize: 10,
   },
   codeHighlightText: {
     color: 'rgba(96,100,109, 0.8)',
@@ -196,11 +230,19 @@ const styles = StyleSheet.create({
   },
   product: {
     flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  productIndicator: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   productImage: {
-    width: 40,
-    height: 40,
+    width: 60,
+    height: 60,
+  },
+  productButton: {
+    marginTop: -15,
   },
 })

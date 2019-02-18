@@ -30,7 +30,7 @@ export default class ProfileScreen extends React.Component {
   _bootstrapAsync = async () => {
     const userToken = await AsyncStorage.getItem('userToken')
     axios
-      .get(`https://api.uber.com/v1.2/me`, {
+      .get(`https://sandbox-api.uber.com/v1.2/me`, {
         headers: {
           Authorization: `Bearer ${userToken}`,
         },
