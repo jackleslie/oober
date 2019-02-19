@@ -22,6 +22,7 @@ import { MonoText } from '../components/StyledText'
 import Profile from '../components/Profile'
 import Product from '../components/Product'
 import Receipt from '../components/Receipt'
+import Estimate from '../components/Estimate'
 
 import carImg from '../assets/images/Car.png'
 
@@ -356,62 +357,38 @@ export default class HomeScreen extends React.Component {
         {this.state.receipt && (
           <Receipt
             visible={this.state.receipt !== null}
-            animationType="slide"
-            style={{ padding: 40 }}
             receipt={this.state.receipt}
             handleDone={() =>
               this.setState({
                 receipt: null,
               })
             }
+            animationType="slide"
+            style={{ padding: 40 }}
           />
         )}
-        <Modal
-          animationType="fade"
-          transparent={false}
-          visible={this.state.requestEstimate !== null}
-          presentationStyle="overFullScreen"
-          transparent
-        >
-          <View style={styles.estimateModalView}>
-            <View>
-              <Text style={styles.estimateModalTitle}>
-                {this.state.requestEstimate &&
-                  `${this.state.requestEstimate.fare.display} • ${
-                    this.state.requestEstimate.trip.distance_estimate
-                  } ${this.state.requestEstimate.trip.distance_unit}(s)`}
-              </Text>
-              <Text style={styles.estimateModalText}>
-                {this.state.requestEstimate &&
-                  `Pickup ETA ${
-                    this.state.requestEstimate.pickup_estimate
-                  } minutes`}
-              </Text>
-              <View style={styles.buttonRow}>
-                <Button
-                  style={styles.productButton}
-                  title="Request"
-                  onPress={() =>
-                    this._handleUberRequestAsync(
-                      this.state.requestEstimate.product_id,
-                      this.state.requestEstimate.fare.fare_id
-                    )
-                  }
-                />
-                <Button
-                  style={styles.productButton}
-                  title="Cancel"
-                  onPress={() =>
-                    this.setState({
-                      requestEstimate: null,
-                      awaitingRequest: false,
-                    })
-                  }
-                />
-              </View>
-            </View>
-          </View>
-        </Modal>
+        {this.state.requestEstimate && (
+          <Estimate
+            visible={this.state.requestEstimate !== null}
+            estimate={this.state.requestEstimate}
+            handleRequest={() => {
+              this._handleUberRequestAsync(
+                this.state.requestEstimate.product_id,
+                this.state.requestEstimate.fare.fare_id
+              )
+            }}
+            handleCancel={() => {
+              this.setState({
+                requestEstimate: null,
+                awaitingRequest: false,
+              })
+            }}
+            animationType="fade"
+            transparent={false}
+            presentationStyle="overFullScreen"
+            transparent
+          />
+        )}
         <ScrollView style={styles.productContainer} pagingEnabled horizontal>
           {this.state.products ? (
             this.state.products.length > 0 ? (
@@ -551,20 +528,6 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-  },
-  estimateModalView: {
-    paddingTop: 60,
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-  },
-  estimateModalTitle: {
-    textAlign: 'center',
-    fontSize: 30,
-  },
-  estimateModalText: {
-    textAlign: 'center',
-    fontSize: 18,
   },
   requestContainer: {
     flex: 1,
