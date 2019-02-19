@@ -20,6 +20,7 @@ import { WebBrowser, MapView, Location } from 'expo'
 
 import { MonoText } from '../components/StyledText'
 import Profile from '../components/Profile'
+import Product from '../components/Product'
 
 import carImg from '../assets/images/Car.png'
 
@@ -379,29 +380,12 @@ export default class HomeScreen extends React.Component {
               !this.state.request ? (
                 !this.state.awaitingRequest ? (
                   this.state.products.map(product => (
-                    <View
+                    <Product
                       key={product.product_id}
-                      style={[styles.product, { width: screenWidth }]}
-                    >
-                      <Image
-                        source={{ uri: product.image }}
-                        style={styles.productImage}
-                        resizeMode="contain"
-                      />
-                      <Text style={styles.productTitle}>
-                        {product.display_name}
-                      </Text>
-                      <Text style={styles.productDescription}>
-                        {product.description}
-                      </Text>
-                      <Button
-                        style={styles.productButton}
-                        title="Choose"
-                        onPress={() =>
-                          this._handleUberSelectAsync(product.product_id)
-                        }
-                      />
-                    </View>
+                      product={product}
+                      screenWidth={screenWidth}
+                      handleChoose={this._handleUberSelectAsync}
+                    />
                   ))
                 ) : (
                   <ActivityIndicator
@@ -517,18 +501,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 8,
   },
-  productTitle: {
-    fontSize: 24,
-    fontWeight: '500',
-    textAlign: 'center',
-    marginTop: -16,
-  },
-  productDescription: {
-    textAlign: 'center',
-    fontWeight: '100',
-    fontStyle: 'italic',
-    fontSize: 10,
-  },
   codeHighlightText: {
     color: 'rgba(96,100,109, 0.8)',
     backgroundColor: 'rgba(0,0,0,0.05)',
@@ -539,23 +511,6 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-  },
-  product: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-  },
-  productIndicator: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  productImage: {
-    width: 60,
-    height: 60,
-  },
-  productButton: {
-    marginTop: -15,
   },
   estimateModalView: {
     paddingTop: 60,
