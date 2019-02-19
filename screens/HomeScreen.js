@@ -21,6 +21,7 @@ import { WebBrowser, MapView, Location } from 'expo'
 import { MonoText } from '../components/StyledText'
 import Profile from '../components/Profile'
 import Product from '../components/Product'
+import Receipt from '../components/Receipt'
 
 import carImg from '../assets/images/Car.png'
 
@@ -44,6 +45,7 @@ export default class HomeScreen extends React.Component {
         latitude: 0.0922,
         longitude: 0.0421,
       }),
+      receipt: null,
       inCar: false,
       awaitingRequest: false,
     }
@@ -281,8 +283,27 @@ export default class HomeScreen extends React.Component {
           latitude: this.state.request.location.latitude,
           longitude: this.state.request.location.longitude,
         })
+        clearInterval(this.interval)
+        return axios.get(
+          `https://sandbox-api.uber.com/v1.2/requests/${
+            this.state.request.request_id
+          }/receipt`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.userToken}`,
+            },
+          }
+        )
       })
-      .then(() => this._handleUberCancelRequestAsync())
+      .then(response => {
+        this.setState({
+          requestEstimate: null,
+          request: null,
+          inCar: false,
+          receipt: response.data,
+        })
+      })
+      .catch(err => console.log(JSON.stringify(err)))
   }
 
   render() {
@@ -308,6 +329,13 @@ export default class HomeScreen extends React.Component {
               coordinate={location}
               title={'Current Location'}
               description={this.state.address}
+              draggable={this.state.request === null}
+              onDrag={({ nativeEvent }) => {
+                this.setState({
+                  latitude: nativeEvent.coordinate.latitude,
+                  longitude: nativeEvent.coordinate.longitude,
+                })
+              }}
             />
           )}
           {this.state.request && this.state.request.location && (
@@ -325,13 +353,23 @@ export default class HomeScreen extends React.Component {
             />
           )}
         </MapView>
+        {this.state.receipt && (
+          <Receipt
+            visible={this.state.receipt !== null}
+            animationType="slide"
+            style={{ padding: 40 }}
+            receipt={this.state.receipt}
+            handleDone={() =>
+              this.setState({
+                receipt: null,
+              })
+            }
+          />
+        )}
         <Modal
           animationType="fade"
           transparent={false}
           visible={this.state.requestEstimate !== null}
-          onRequestClose={() => {
-            Alert.alert('Modal has been closed.')
-          }}
           presentationStyle="overFullScreen"
           transparent
         >
@@ -417,10 +455,12 @@ export default class HomeScreen extends React.Component {
                           onPress={this._handleUberTripEndAsync}
                         />
                       )}
-                      <Button
-                        title="Cancel Request"
-                        onPress={this._handleUberCancelRequestAsync}
-                      />
+                      {this.state.request.status !== 'in_progress' && (
+                        <Button
+                          title="Cancel Request"
+                          onPress={this._handleUberCancelRequestAsync}
+                        />
+                      )}
                     </View>
                   </View>
                   {this.state.request.driver && (
