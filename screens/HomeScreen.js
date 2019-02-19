@@ -21,13 +21,16 @@ import { WebBrowser, MapView, Location } from 'expo'
 import { MonoText } from '../components/StyledText'
 import Profile from '../components/Profile'
 
+import carImg from '../assets/images/Car.png'
+
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props)
-    this._getLocationAsync()
+    //this._getLocationAsync()
+    this._bootstrapAsync()
     this.state = {
-      latitude: null,
-      longitude: null,
+      latitude: 37.774929,
+      longitude: -122.419418,
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
       address: null,
@@ -36,6 +39,10 @@ export default class HomeScreen extends React.Component {
       requestEstimate: null,
       request: null,
       driver: null,
+      driverLocation: new MapView.AnimatedRegion({
+        latitude: 0.0922,
+        longitude: 0.0421,
+      }),
     }
   }
 
@@ -149,7 +156,13 @@ export default class HomeScreen extends React.Component {
         data: {
           status: 'accepted',
         },
-      }).then(response => console.log(response.data))
+      }).then(response => {
+        console.log(response.data)
+        this.interval = setInterval(
+          () => this._handleUberRequestReloadAsync(response.data.request_id),
+          2000
+        )
+      })
     })
   }
 
@@ -172,6 +185,22 @@ export default class HomeScreen extends React.Component {
           request: response.data,
         })
       })
+      .then(() => {
+        const { location } = this.state.request
+        const { driverLocation } = this.state
+        const newCoordinate = {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        }
+
+        if (Platform.OS === 'android') {
+          if (this.driver) {
+            this.driver._component.animateMarkerToCoordinate(newCoordinate, 500)
+          }
+        } else {
+          driverLocation.timing(newCoordinate).start()
+        }
+      })
   }
 
   _handleUberCancelRequestAsync = async () => {
@@ -187,6 +216,7 @@ export default class HomeScreen extends React.Component {
         requestEstimate: null,
         request: null,
       })
+      clearInterval(this.interval)
     })
   }
 
@@ -213,6 +243,20 @@ export default class HomeScreen extends React.Component {
             title={'Current Location'}
             description={this.state.address}
           />
+          {this.state.request && this.state.request.location && (
+            <MapView.Marker.Animated
+              ref={driver => {
+                this.driver = driver
+              }}
+              coordinate={this.state.driverLocation}
+              image={carImg}
+              style={{
+                transform: [
+                  { rotate: `${this.state.request.location.bearing}deg` },
+                ],
+              }}
+            />
+          )}
         </MapView>
         <Modal
           animationType="fade"
@@ -280,7 +324,7 @@ export default class HomeScreen extends React.Component {
                     </Text>
                     <Button
                       style={styles.productButton}
-                      title="Select"
+                      title="Choose"
                       onPress={() =>
                         this._handleUberSelectAsync(product.product_id)
                       }
@@ -290,22 +334,17 @@ export default class HomeScreen extends React.Component {
               ) : (
                 <>
                   <View
-                    style={[styles.requestContainer, { width: screenWidth }]}
+                    style={[
+                      styles.requestStatusContainer,
+                      { width: screenWidth },
+                    ]}
                   >
                     <Text style={styles.productTitle}>
                       Request {this.state.request.status}
                     </Text>
                     <View style={styles.buttonRow}>
                       <Button
-                        title="Reload"
-                        onPress={() =>
-                          this._handleUberRequestReloadAsync(
-                            this.state.request.request_id
-                          )
-                        }
-                      />
-                      <Button
-                        title="Cancel"
+                        title="Cancel Request"
                         onPress={this._handleUberCancelRequestAsync}
                       />
                     </View>
@@ -447,6 +486,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingTop: 5,
     justifyContent: 'space-around',
+  },
+  requestStatusContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   vehicleContainer: {
     flex: 1,
