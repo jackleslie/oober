@@ -43,6 +43,7 @@ export default class HomeScreen extends React.Component {
         latitude: 0.0922,
         longitude: 0.0421,
       }),
+      inCar: false,
     }
   }
 
@@ -109,8 +110,8 @@ export default class HomeScreen extends React.Component {
         product_id: product_id,
         start_latitude: this.state.latitude,
         start_longitude: this.state.longitude,
-        end_latitude: this.state.latitude - 0.05,
-        end_longitude: this.state.longitude - 0.05,
+        end_latitude: 37.762009,
+        end_longitude: -122.434677,
       },
     })
       .then(response => {
@@ -136,8 +137,8 @@ export default class HomeScreen extends React.Component {
         product_id: product_id,
         start_latitude: this.state.latitude,
         start_longitude: this.state.longitude,
-        end_latitude: this.state.latitude - 0.05,
-        end_longitude: this.state.longitude - 0.05,
+        end_latitude: 37.762009,
+        end_longitude: -122.434677,
       },
     }).then(response => {
       console.log(response.data)
@@ -215,9 +216,68 @@ export default class HomeScreen extends React.Component {
       this.setState({
         requestEstimate: null,
         request: null,
+        inCar: false,
       })
       clearInterval(this.interval)
     })
+  }
+
+  _handleUberInCarAsync = async () => {
+    const userToken = await AsyncStorage.getItem('userToken')
+    axios({
+      method: 'put',
+      url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
+        this.state.request.request_id
+      }`,
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+      data: {
+        status: 'arriving',
+      },
+    })
+      .then(() => {
+        axios({
+          method: 'put',
+          url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
+            this.state.request.request_id
+          }`,
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+          data: {
+            status: 'in_progress',
+          },
+        })
+      })
+      .then(() => {
+        this.setState({
+          inCar: true,
+        })
+      })
+  }
+
+  _handleUberTripEndAsync = async () => {
+    const userToken = await AsyncStorage.getItem('userToken')
+    axios({
+      method: 'put',
+      url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
+        this.state.request.request_id
+      }`,
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+      data: {
+        status: 'completed',
+      },
+    })
+      .then(() => this._handleUberCancelRequestAsync())
+      .then(() => {
+        this.setState({
+          latitude: 37.762009,
+          longitude: -122.434677,
+        })
+      })
   }
 
   render() {
@@ -238,11 +298,13 @@ export default class HomeScreen extends React.Component {
             longitudeDelta: 0.0421,
           }}
         >
-          <MapView.Marker
-            coordinate={location}
-            title={'Current Location'}
-            description={this.state.address}
-          />
+          {!this.state.inCar && (
+            <MapView.Marker
+              coordinate={location}
+              title={'Current Location'}
+              description={this.state.address}
+            />
+          )}
           {this.state.request && this.state.request.location && (
             <MapView.Marker.Animated
               ref={driver => {
@@ -343,6 +405,18 @@ export default class HomeScreen extends React.Component {
                       Request {this.state.request.status}
                     </Text>
                     <View style={styles.buttonRow}>
+                      {this.state.request.status === 'accepted' && (
+                        <Button
+                          title="I'm in!"
+                          onPress={this._handleUberInCarAsync}
+                        />
+                      )}
+                      {this.state.request.status === 'in_progress' && (
+                        <Button
+                          title="Arrived"
+                          onPress={this._handleUberTripEndAsync}
+                        />
+                      )}
                       <Button
                         title="Cancel Request"
                         onPress={this._handleUberCancelRequestAsync}
