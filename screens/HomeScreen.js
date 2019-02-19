@@ -44,6 +44,7 @@ export default class HomeScreen extends React.Component {
         longitude: 0.0421,
       }),
       inCar: false,
+      awaitingRequest: false,
     }
   }
 
@@ -52,7 +53,7 @@ export default class HomeScreen extends React.Component {
   }
 
   _bootstrapAsync = async () => {
-    const userToken = await AsyncStorage.getItem('userToken')
+    this.userToken = await AsyncStorage.getItem('userToken')
     axios
       .get(`https://sandbox-api.uber.com/v1.2/products`, {
         params: {
@@ -60,7 +61,7 @@ export default class HomeScreen extends React.Component {
           longitude: this.state.longitude,
         },
         headers: {
-          Authorization: `Bearer ${userToken}`,
+          Authorization: `Bearer ${this.userToken}`,
         },
       })
       .then(results => {
@@ -99,12 +100,14 @@ export default class HomeScreen extends React.Component {
   }
 
   _handleUberSelectAsync = async product_id => {
-    const userToken = await AsyncStorage.getItem('userToken')
+    await this.setState({
+      awaitingRequest: true,
+    })
     axios({
       method: 'post',
       url: 'https://sandbox-api.uber.com/v1.2/requests/estimate',
       headers: {
-        Authorization: `Bearer ${userToken}`,
+        Authorization: `Bearer ${this.userToken}`,
       },
       data: {
         product_id: product_id,
@@ -121,16 +124,20 @@ export default class HomeScreen extends React.Component {
           requestEstimate: response.data,
         })
       })
-      .catch(console.log)
+      .catch(err => {
+        this.setState({
+          awaitingRequest: false,
+        })
+        console.log(err)
+      })
   }
 
   _handleUberRequestAsync = async (product_id, fare_id) => {
-    const userToken = await AsyncStorage.getItem('userToken')
     axios({
       method: 'post',
       url: 'https://sandbox-api.uber.com/v1.2/requests',
       headers: {
-        Authorization: `Bearer ${userToken}`,
+        Authorization: `Bearer ${this.userToken}`,
       },
       data: {
         fare_id: fare_id,
@@ -145,6 +152,7 @@ export default class HomeScreen extends React.Component {
       this.setState({
         requestEstimate: null,
         request: response.data,
+        awaitingRequest: false,
       })
       return axios({
         method: 'put',
@@ -152,7 +160,7 @@ export default class HomeScreen extends React.Component {
           response.data.request_id
         }`,
         headers: {
-          Authorization: `Bearer ${userToken}`,
+          Authorization: `Bearer ${this.userToken}`,
         },
         data: {
           status: 'accepted',
@@ -168,7 +176,6 @@ export default class HomeScreen extends React.Component {
   }
 
   _handleUberRequestReloadAsync = async request_id => {
-    const userToken = await AsyncStorage.getItem('userToken')
     axios
       .get(
         `https://sandbox-api.uber.com/v1.2/requests/${
@@ -176,7 +183,7 @@ export default class HomeScreen extends React.Component {
         }`,
         {
           headers: {
-            Authorization: `Bearer ${userToken}`,
+            Authorization: `Bearer ${this.userToken}`,
           },
         }
       )
@@ -205,12 +212,11 @@ export default class HomeScreen extends React.Component {
   }
 
   _handleUberCancelRequestAsync = async () => {
-    const userToken = await AsyncStorage.getItem('userToken')
     axios({
       method: 'delete',
       url: 'https://sandbox-api.uber.com/v1.2/requests/current',
       headers: {
-        Authorization: `Bearer ${userToken}`,
+        Authorization: `Bearer ${this.userToken}`,
       },
     }).then(() => {
       this.setState({
@@ -223,14 +229,13 @@ export default class HomeScreen extends React.Component {
   }
 
   _handleUberInCarAsync = async () => {
-    const userToken = await AsyncStorage.getItem('userToken')
     axios({
       method: 'put',
       url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
         this.state.request.request_id
       }`,
       headers: {
-        Authorization: `Bearer ${userToken}`,
+        Authorization: `Bearer ${this.userToken}`,
       },
       data: {
         status: 'arriving',
@@ -243,7 +248,7 @@ export default class HomeScreen extends React.Component {
             this.state.request.request_id
           }`,
           headers: {
-            Authorization: `Bearer ${userToken}`,
+            Authorization: `Bearer ${this.userToken}`,
           },
           data: {
             status: 'in_progress',
@@ -258,26 +263,25 @@ export default class HomeScreen extends React.Component {
   }
 
   _handleUberTripEndAsync = async () => {
-    const userToken = await AsyncStorage.getItem('userToken')
     axios({
       method: 'put',
       url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
         this.state.request.request_id
       }`,
       headers: {
-        Authorization: `Bearer ${userToken}`,
+        Authorization: `Bearer ${this.userToken}`,
       },
       data: {
         status: 'completed',
       },
     })
-      .then(() => this._handleUberCancelRequestAsync())
       .then(() => {
         this.setState({
-          latitude: 37.762009,
-          longitude: -122.434677,
+          latitude: this.state.request.location.latitude,
+          longitude: this.state.request.location.longitude,
         })
       })
+      .then(() => this._handleUberCancelRequestAsync())
   }
 
   render() {
@@ -358,7 +362,12 @@ export default class HomeScreen extends React.Component {
                 <Button
                   style={styles.productButton}
                   title="Cancel"
-                  onPress={() => this.setState({ requestEstimate: null })}
+                  onPress={() =>
+                    this.setState({
+                      requestEstimate: null,
+                      awaitingRequest: false,
+                    })
+                  }
                 />
               </View>
             </View>
@@ -368,31 +377,38 @@ export default class HomeScreen extends React.Component {
           {this.state.products ? (
             this.state.products.length > 0 ? (
               !this.state.request ? (
-                this.state.products.map(product => (
-                  <View
-                    key={product.product_id}
-                    style={[styles.product, { width: screenWidth }]}
-                  >
-                    <Image
-                      source={{ uri: product.image }}
-                      style={styles.productImage}
-                      resizeMode="contain"
-                    />
-                    <Text style={styles.productTitle}>
-                      {product.display_name}
-                    </Text>
-                    <Text style={styles.productDescription}>
-                      {product.description}
-                    </Text>
-                    <Button
-                      style={styles.productButton}
-                      title="Choose"
-                      onPress={() =>
-                        this._handleUberSelectAsync(product.product_id)
-                      }
-                    />
-                  </View>
-                ))
+                !this.state.awaitingRequest ? (
+                  this.state.products.map(product => (
+                    <View
+                      key={product.product_id}
+                      style={[styles.product, { width: screenWidth }]}
+                    >
+                      <Image
+                        source={{ uri: product.image }}
+                        style={styles.productImage}
+                        resizeMode="contain"
+                      />
+                      <Text style={styles.productTitle}>
+                        {product.display_name}
+                      </Text>
+                      <Text style={styles.productDescription}>
+                        {product.description}
+                      </Text>
+                      <Button
+                        style={styles.productButton}
+                        title="Choose"
+                        onPress={() =>
+                          this._handleUberSelectAsync(product.product_id)
+                        }
+                      />
+                    </View>
+                  ))
+                ) : (
+                  <ActivityIndicator
+                    size="large"
+                    style={[styles.productIndicator, { width: screenWidth }]}
+                  />
+                )
               ) : (
                 <>
                   <View
