@@ -15,6 +15,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Modal,
+  Animated,
 } from 'react-native'
 import { WebBrowser, MapView, Location } from 'expo'
 
@@ -23,6 +24,7 @@ import Profile from '../components/Profile'
 import Product from '../components/Product'
 import Receipt from '../components/Receipt'
 import Estimate from '../components/Estimate'
+import Driver from '../components/Driver'
 
 import carImg from '../assets/images/Car.png'
 
@@ -51,6 +53,8 @@ export default class HomeScreen extends React.Component {
       awaitingRequest: false,
     }
   }
+
+  scrollX = new Animated.Value(0)
 
   static navigationOptions = {
     header: null,
@@ -314,6 +318,7 @@ export default class HomeScreen extends React.Component {
       longitude: this.state.longitude,
     }
     let screenWidth = Dimensions.get('window').width
+    let position = Animated.divide(this.scrollX, screenWidth)
     return this.state.latitude ? (
       <>
         <MapView
@@ -389,100 +394,152 @@ export default class HomeScreen extends React.Component {
             transparent
           />
         )}
-        <ScrollView style={styles.productContainer} pagingEnabled horizontal>
-          {this.state.products ? (
-            this.state.products.length > 0 ? (
-              !this.state.request ? (
-                !this.state.awaitingRequest ? (
-                  this.state.products.map(product => (
-                    <Product
-                      key={product.product_id}
-                      product={product}
-                      screenWidth={screenWidth}
-                      handleChoose={this._handleUberSelectAsync}
-                    />
-                  ))
-                ) : (
-                  <ActivityIndicator
-                    size="large"
-                    style={[styles.productIndicator, { width: screenWidth }]}
-                  />
-                )
-              ) : (
-                <>
-                  <View
-                    style={[
-                      styles.requestStatusContainer,
-                      { width: screenWidth },
-                    ]}
-                  >
-                    <Text style={styles.productTitle}>
-                      Request {this.state.request.status}
-                    </Text>
-                    <View style={styles.buttonRow}>
-                      {this.state.request.status === 'accepted' && (
-                        <Button
-                          title="I'm in!"
-                          onPress={this._handleUberInCarAsync}
-                        />
-                      )}
-                      {this.state.request.status === 'in_progress' && (
-                        <Button
-                          title="Arrived"
-                          onPress={this._handleUberTripEndAsync}
-                        />
-                      )}
-                      {this.state.request.status !== 'in_progress' && (
-                        <Button
-                          title="Cancel Request"
-                          onPress={this._handleUberCancelRequestAsync}
-                        />
-                      )}
-                    </View>
-                  </View>
-                  {this.state.request.driver && (
-                    <View
-                      style={[styles.requestContainer, { width: screenWidth }]}
-                    >
-                      <Profile
-                        picture={this.state.request.driver.picture_url}
-                        name={this.state.request.driver.name}
-                        contact={this.state.request.driver.phone_number}
-                        verified
-                        verifiedText={this.state.request.driver.rating.toString()}
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <ScrollView
+            style={styles.productContainer}
+            pagingEnabled
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            onScroll={Animated.event([
+              { nativeEvent: { contentOffset: { x: this.scrollX } } },
+            ])}
+            scrollEventThrottle={16}
+          >
+            {this.state.products ? (
+              this.state.products.length > 0 ? (
+                !this.state.request ? (
+                  !this.state.awaitingRequest ? (
+                    this.state.products.map(product => (
+                      <Product
+                        key={product.product_id}
+                        product={product}
+                        screenWidth={screenWidth}
+                        handleChoose={this._handleUberSelectAsync}
                       />
-                      <View style={styles.vehicleContainer}>
-                        <Image
-                          source={{
-                            uri: this.state.request.vehicle.picture_url,
-                          }}
-                          style={styles.vehicleImage}
-                        />
-                        <Text style={styles.vehicleText}>
-                          {this.state.request.vehicle.make}{' '}
-                          {this.state.request.vehicle.model}
-                          {'\n'}
-                          <Text style={styles.vehicleLicensePlate}>
-                            {this.state.request.vehicle.license_plate}
-                          </Text>
-                        </Text>
+                    ))
+                  ) : (
+                    <ActivityIndicator
+                      size="large"
+                      style={[styles.productIndicator, { width: screenWidth }]}
+                    />
+                  )
+                ) : (
+                  <>
+                    <View
+                      style={[
+                        styles.requestStatusContainer,
+                        { width: screenWidth },
+                      ]}
+                    >
+                      <Text style={styles.productTitle}>
+                        Request {this.state.request.status}
+                      </Text>
+                      <View style={styles.buttonRow}>
+                        {this.state.request.status === 'accepted' && (
+                          <Button
+                            title="I'm in!"
+                            onPress={this._handleUberInCarAsync}
+                          />
+                        )}
+                        {this.state.request.status === 'in_progress' && (
+                          <Button
+                            title="Arrived"
+                            onPress={this._handleUberTripEndAsync}
+                          />
+                        )}
+                        {this.state.request.status !== 'in_progress' && (
+                          <Button
+                            title="Cancel Request"
+                            onPress={this._handleUberCancelRequestAsync}
+                          />
+                        )}
                       </View>
                     </View>
-                  )}
-                </>
+                    {this.state.request.driver && (
+                      <Driver
+                        driver={this.state.request.driver}
+                        vehicle={this.state.request.vehicle}
+                        screenWidth={screenWidth}
+                      />
+                    )}
+                  </>
+                )
+              ) : (
+                <View style={[styles.product, { width: screenWidth }]}>
+                  <Text style={styles.productTitle}>No drivers available</Text>
+                </View>
               )
             ) : (
-              <View style={[styles.product, { width: screenWidth }]}>
-                <Text style={styles.productTitle}>No drivers available</Text>
-              </View>
-            )
-          ) : (
-            <ActivityIndicator
-              size="large"
-              style={[styles.productIndicator, { width: screenWidth }]}
-            />
+              <ActivityIndicator
+                size="large"
+                style={[styles.productIndicator, { width: screenWidth }]}
+              />
+            )}
+          </ScrollView>
+          {!this.state.awaitingRequest && (
+            <View style={{ flexDirection: 'row' }}>
+              {this.state.products &&
+              this.state.products.length &&
+              !this.state.request > 0
+                ? this.state.products.map((_, i) => {
+                    let opacity = position.interpolate({
+                      inputRange: [
+                        i - 0.50000000001,
+                        i - 0.5,
+                        i,
+                        i + 0.5,
+                        i + 0.50000000001,
+                      ],
+                      outputRange: [0.3, 1, 1, 1, 0.3],
+                      extrapolate: 'clamp',
+                    })
+                    return (
+                      <Animated.View
+                        key={i}
+                        style={{
+                          opacity,
+                          height: 6,
+                          width: 6,
+                          backgroundColor: '#595959',
+                          margin: 8,
+                          borderRadius: 3,
+                        }}
+                      />
+                    )
+                  })
+                : this.state.request &&
+                  this.state.request.driver &&
+                  [0, 1].map((_, i) => {
+                    let opacity = position.interpolate({
+                      inputRange: [
+                        i - 0.50000000001,
+                        i - 0.5,
+                        i,
+                        i + 0.5,
+                        i + 0.50000000001,
+                      ],
+                      outputRange: [0.3, 1, 1, 1, 0.3],
+                      extrapolate: 'clamp',
+                    })
+                    return (
+                      <Animated.View
+                        key={i}
+                        style={{
+                          opacity,
+                          height: 6,
+                          width: 6,
+                          backgroundColor: '#595959',
+                          margin: 8,
+                          borderRadius: 3,
+                        }}
+                      />
+                    )
+                  })}
+            </View>
           )}
-        </ScrollView>
+        </View>
       </>
     ) : (
       <ScrollView
@@ -516,7 +573,6 @@ const styles = StyleSheet.create({
   },
   productContainer: {
     flex: 1,
-    padding: 8,
   },
   codeHighlightText: {
     color: 'rgba(96,100,109, 0.8)',
@@ -539,20 +595,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  vehicleContainer: {
-    flex: 1,
-    paddingLeft: 5,
-    paddingRight: 15,
-  },
-  vehicleImage: {
-    flex: 1,
-  },
-  vehicleText: {
-    flex: 1,
-  },
-  vehicleLicensePlate: {
-    backgroundColor: '#fbce30',
-    fontWeight: '900',
   },
 })

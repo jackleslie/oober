@@ -4,12 +4,14 @@ import { StyleSheet, View, Image, Text, Button } from 'react-native'
 
 const Product = ({ product, screenWidth, handleChoose }) => (
   <View style={[styles.product, { width: screenWidth }]}>
-    <Image
-      source={{ uri: product.image }}
-      style={styles.productImage}
-      resizeMode="contain"
-    />
-    <Text style={styles.productTitle}>{product.display_name}</Text>
+    <View style={{ flexDirection: 'row' }}>
+      <Text style={styles.productTitle}>{product.display_name}</Text>
+      <Image
+        source={{ uri: product.image }}
+        style={styles.productImage}
+        resizeMode="contain"
+      />
+    </View>
     <Text style={styles.productDescription}>{product.description}</Text>
     <Button
       style={styles.productButton}
@@ -22,8 +24,9 @@ const Product = ({ product, screenWidth, handleChoose }) => (
 const styles = StyleSheet.create({
   product: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 15,
   },
   productIndicator: {
     flex: 1,
@@ -31,8 +34,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   productImage: {
-    width: 60,
-    height: 60,
+    width: 30,
+    height: 30,
   },
   productButton: {
     marginTop: -15,
@@ -41,7 +44,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '500',
     textAlign: 'center',
-    marginTop: -16,
+    paddingRight: 5,
   },
   productDescription: {
     textAlign: 'center',
