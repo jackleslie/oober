@@ -17,7 +17,10 @@ const Estimate = ({
           {estimate.trip.distance_unit}(s)
         </Text>
         <Text style={styles.estimateModalText}>
-          Pickup ETA ${estimate.pickup_estimate} minutes
+          Pickup ETA{' '}
+          {estimate.pickup_estimate
+            ? `${estimate.pickup_estimate} minute(s)`
+            : 'TBC'}
         </Text>
         <View style={styles.buttonRow}>
           <Button

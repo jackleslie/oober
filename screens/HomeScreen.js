@@ -17,6 +17,7 @@ import {
   Animated,
 } from 'react-native'
 import { WebBrowser, MapView, Location } from 'expo'
+import MapViewDirections from 'react-native-maps-directions'
 
 import { MonoText } from '../components/StyledText'
 import Profile from '../components/Profile'
@@ -31,22 +32,26 @@ import carImg from '../assets/images/Car.png'
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props)
-    this._getLocationAsync()
-    // this._bootstrapAsync()
+    // this._getLocationAsync()
+    this._bootstrapAsync()
     this.state = {
-      latitude: null,
-      longitude: null,
+      latitude: 37.762009,
+      longitude: -122.434677,
+      endLatitude: 37.762009 - 0.01,
+      endLongitude: -122.434677 - 0.01,
+      route: null,
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
       address: null,
+      endAddress: null,
       refreshing: false,
       products: null,
       requestEstimate: null,
       request: null,
       driver: null,
       driverLocation: new MapView.AnimatedRegion({
-        latitude: 0.0922,
-        longitude: 0.0421,
+        latitude: 37.762009,
+        longitude: -122.434677,
       }),
       receipt: null,
       inCar: false,
@@ -107,6 +112,15 @@ export default class HomeScreen extends React.Component {
         this.setState({
           address: results[0].name,
         })
+        return Location.reverseGeocodeAsync({
+          latitude: this.state.endLatitude,
+          longitude: this.state.endLongitude,
+        })
+      })
+      .then(results => {
+        this.setState({
+          endAddress: results[0].name,
+        })
         return this._bootstrapAsync()
       })
       .catch(console.log)
@@ -126,8 +140,8 @@ export default class HomeScreen extends React.Component {
         product_id: product_id,
         start_latitude: this.state.latitude,
         start_longitude: this.state.longitude,
-        end_latitude: this.state.latitude - 0.01,
-        end_longitude: this.state.longitude - 0.01,
+        end_latitude: this.state.endLatitude,
+        end_longitude: this.state.endLongitude,
       },
     })
       .then(response => {
@@ -157,8 +171,8 @@ export default class HomeScreen extends React.Component {
         product_id: product_id,
         start_latitude: this.state.latitude,
         start_longitude: this.state.longitude,
-        end_latitude: this.state.latitude - 0.01,
-        end_longitude: this.state.longitude - 0.01,
+        end_latitude: this.state.endLatitude,
+        end_longitude: this.state.endLongitude,
       },
     }).then(response => {
       console.log(response.data)
@@ -294,6 +308,7 @@ export default class HomeScreen extends React.Component {
           longitude: this.state.request.location.longitude,
         })
         clearInterval(this.interval)
+        this._getLocationNameAsync()
         return axios.get(
           `https://sandbox-api.uber.com/v1.2/requests/${
             this.state.request.request_id
@@ -322,6 +337,15 @@ export default class HomeScreen extends React.Component {
       latitude: this.state.latitude,
       longitude: this.state.longitude,
     }
+    let endLocation = {
+      latitude: this.state.endLatitude,
+      longitude: this.state.endLongitude,
+    }
+    let driverLocation = this.state.request &&
+      this.state.request.location && {
+        latitude: this.state.request.location.latitude,
+        longitude: this.state.request.location.longitude,
+      }
     let screenWidth = Dimensions.get('window').width
     let position = Animated.divide(this.scrollX, screenWidth)
     return this.state.latitude ? (
@@ -350,6 +374,20 @@ export default class HomeScreen extends React.Component {
               onDragEnd={() => this._getLocationNameAsync()}
             />
           )}
+          <MapView.Marker
+            coordinate={endLocation}
+            title={'Destination'}
+            description={this.state.endAddress}
+            draggable={this.state.request === null}
+            pinColor="#0061ff"
+            onDrag={({ nativeEvent }) => {
+              this.setState({
+                endLatitude: nativeEvent.coordinate.latitude,
+                endLongitude: nativeEvent.coordinate.longitude,
+              })
+            }}
+            onDragEnd={() => this._getLocationNameAsync()}
+          />
           {this.state.request && this.state.request.location && (
             <MapView.Marker.Animated
               ref={driver => {
@@ -362,6 +400,20 @@ export default class HomeScreen extends React.Component {
                   { rotate: `${this.state.request.location.bearing}deg` },
                 ],
               }}
+            />
+          )}
+          {this.state.requestEstimate && (
+            <MapViewDirections
+              origin={location}
+              destination={endLocation}
+              apikey="AIzaSyAAC1h8dkCQCYZ5hLa8Z5Afkvep9AJ4kFk"
+            />
+          )}
+          {this.state.request && this.state.request.status === 'accepted' && (
+            <MapViewDirections
+              origin={driverLocation}
+              destination={location}
+              apikey="AIzaSyAAC1h8dkCQCYZ5hLa8Z5Afkvep9AJ4kFk"
             />
           )}
         </MapView>
@@ -439,7 +491,7 @@ export default class HomeScreen extends React.Component {
                         { width: screenWidth },
                       ]}
                     >
-                      <Text style={styles.productTitle}>
+                      <Text style={styles.statusTitle}>
                         Request {this.state.request.status}
                       </Text>
                       <View style={styles.buttonRow}>
@@ -473,8 +525,8 @@ export default class HomeScreen extends React.Component {
                   </>
                 )
               ) : (
-                <View style={[styles.product, { width: screenWidth }]}>
-                  <Text style={styles.productTitle}>No drivers available</Text>
+                <View style={[styles.status, { width: screenWidth }]}>
+                  <Text style={styles.statusTitle}>No drivers available</Text>
                 </View>
               )
             ) : (
@@ -579,5 +631,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  status: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusTitle: {
+    fontSize: 24,
+    fontWeight: '500',
+    textAlign: 'center',
+    paddingRight: 5,
   },
 })

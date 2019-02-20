@@ -3,7 +3,14 @@ import PropTypes from 'prop-types'
 import { StyleSheet, View, Image, Text, Platform } from 'react-native'
 import { Icon } from 'expo'
 
-const Profile = ({ picture, name, contact, verified, verifiedText }) => (
+const Profile = ({
+  picture,
+  name,
+  contact,
+  isDriver,
+  verified,
+  verifiedText,
+}) => (
   <View style={styles.profileHeader}>
     <Image source={{ uri: picture }} style={styles.profilePicture} />
     <View style={styles.profileInfo}>
@@ -19,6 +26,12 @@ const Profile = ({ picture, name, contact, verified, verifiedText }) => (
             }
             size={26}
             color="#70C1B3"
+          />
+        ) : isDriver ? (
+          <Icon.Ionicons
+            name={Platform.OS === 'ios' ? 'ios-star' : 'md-star'}
+            size={26}
+            color="#fbbc22"
           />
         ) : (
           <Icon.Ionicons
@@ -74,6 +87,7 @@ Profile.propTypes = {
   picture: PropTypes.string.isRequired,
   name: PropTypes.string,
   contact: PropTypes.string,
+  isDriver: PropTypes.bool,
   verified: PropTypes.bool,
   verifiedText: PropTypes.string,
 }
@@ -81,8 +95,9 @@ Profile.propTypes = {
 Profile.defaultProps = {
   name: 'John',
   contact: '(555)555-5555',
-  verified: true,
-  verifiedText: 'Verified',
+  isDriver: false,
+  verified: false,
+  verifiedText: 'Unverified',
 }
 
 export default Profile

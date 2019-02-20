@@ -10,8 +10,8 @@ const Driver = ({ driver, vehicle, screenWidth }) => (
       picture={driver.picture_url}
       name={driver.name}
       contact={driver.phone_number}
-      verified
       verifiedText={driver.rating.toString()}
+      isDriver
     />
     <View style={styles.vehicleContainer}>
       <Image
@@ -19,6 +19,7 @@ const Driver = ({ driver, vehicle, screenWidth }) => (
           uri: vehicle.picture_url,
         }}
         style={styles.vehicleImage}
+        resizeMode="contain"
       />
       <Text style={styles.vehicleText}>
         {vehicle.make} {vehicle.model}
@@ -33,7 +34,8 @@ const styles = StyleSheet.create({
   requestContainer: {
     flex: 1,
     flexDirection: 'row',
-    paddingTop: 5,
+    paddingVertical: 5,
+    paddingLeft: 10,
     justifyContent: 'space-around',
   },
   requestStatusContainer: {
@@ -43,18 +45,19 @@ const styles = StyleSheet.create({
   },
   vehicleContainer: {
     flex: 1,
-    paddingLeft: 5,
-    paddingRight: 15,
+    paddingTop: 15,
   },
   vehicleImage: {
     flex: 1,
   },
   vehicleText: {
     flex: 1,
+    textAlign: 'center',
   },
   vehicleLicensePlate: {
     backgroundColor: '#fbce30',
     fontWeight: '900',
+    textAlign: 'center',
   },
 })
 
