@@ -5,7 +5,6 @@ import {
   Button,
   Platform,
   ScrollView,
-  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -25,17 +24,18 @@ import Product from '../components/Product'
 import Receipt from '../components/Receipt'
 import Estimate from '../components/Estimate'
 import Driver from '../components/Driver'
+import LocationAccess from '../components/LocationAccess'
 
 import carImg from '../assets/images/Car.png'
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props)
-    //this._getLocationAsync()
-    this._bootstrapAsync()
+    this._getLocationAsync()
+    // this._bootstrapAsync()
     this.state = {
-      latitude: 37.774929,
-      longitude: -122.419418,
+      latitude: null,
+      longitude: null,
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
       address: null,
@@ -93,11 +93,16 @@ export default class HomeScreen extends React.Component {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         })
-        return Location.reverseGeocodeAsync({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        })
+        this._getLocationNameAsync()
       })
+      .catch(console.log)
+  }
+
+  _getLocationNameAsync = async () => {
+    Location.reverseGeocodeAsync({
+      latitude: this.state.latitude,
+      longitude: this.state.longitude,
+    })
       .then(results => {
         this.setState({
           address: results[0].name,
@@ -121,8 +126,8 @@ export default class HomeScreen extends React.Component {
         product_id: product_id,
         start_latitude: this.state.latitude,
         start_longitude: this.state.longitude,
-        end_latitude: 37.762009,
-        end_longitude: -122.434677,
+        end_latitude: this.state.latitude - 0.01,
+        end_longitude: this.state.longitude - 0.01,
       },
     })
       .then(response => {
@@ -136,7 +141,7 @@ export default class HomeScreen extends React.Component {
         this.setState({
           awaitingRequest: false,
         })
-        console.log(err)
+        console.log(JSON.stringify(err))
       })
   }
 
@@ -152,8 +157,8 @@ export default class HomeScreen extends React.Component {
         product_id: product_id,
         start_latitude: this.state.latitude,
         start_longitude: this.state.longitude,
-        end_latitude: 37.762009,
-        end_longitude: -122.434677,
+        end_latitude: this.state.latitude - 0.01,
+        end_longitude: this.state.longitude - 0.01,
       },
     }).then(response => {
       console.log(response.data)
@@ -342,6 +347,7 @@ export default class HomeScreen extends React.Component {
                   longitude: nativeEvent.coordinate.longitude,
                 })
               }}
+              onDragEnd={() => this._getLocationNameAsync()}
             />
           )}
           {this.state.request && this.state.request.location && (
@@ -542,44 +548,22 @@ export default class HomeScreen extends React.Component {
         </View>
       </>
     ) : (
-      <ScrollView
-        contentContainerStyle={styles.container}
-        refreshControl={
-          <RefreshControl
-            refreshing={this.state.refreshing}
-            onRefresh={this._onRefresh}
-          />
-        }
-      >
-        <Text>Please allow location access in </Text>
-        <Text
-          style={styles.link}
-          onPress={() => Linking.openURL('app-settings:')}
-        >
-          Settings
-        </Text>
-      </ScrollView>
+      <LocationAccess
+        refreshing={this.state.refreshing}
+        handleRefresh={this._onRefresh}
+        handleLink={() => Linking.openURL('app-settings:')}
+      />
     )
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   productContainer: {
     flex: 1,
   },
   codeHighlightText: {
     color: 'rgba(96,100,109, 0.8)',
     backgroundColor: 'rgba(0,0,0,0.05)',
-  },
-  link: {
-    fontWeight: '600',
   },
   buttonRow: {
     flexDirection: 'row',
