@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 5,
     paddingLeft: 10,
-    justifyContent: 'space-around',
   },
   requestStatusContainer: {
     flex: 1,

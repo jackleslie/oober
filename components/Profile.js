@@ -1,6 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { StyleSheet, View, Image, Text, Platform } from 'react-native'
+import {
+  StyleSheet,
+  View,
+  Image,
+  Text,
+  Platform,
+  Button,
+  Linking,
+} from 'react-native'
 import { Icon } from 'expo'
 
 const Profile = ({
@@ -15,7 +23,16 @@ const Profile = ({
     <Image source={{ uri: picture }} style={styles.profilePicture} />
     <View style={styles.profileInfo}>
       <Text style={styles.profileName}>{name}</Text>
-      <Text style={styles.profileEmail}>{contact}</Text>
+      {isDriver ? (
+        <Text
+          style={styles.profileContact}
+          onPress={() => Linking.openURL(`tel:${contact}`)}
+        >
+          {contact}
+        </Text>
+      ) : (
+        <Text style={styles.profileContact}>{contact}</Text>
+      )}
       <View style={styles.profileVerified}>
         {verified ? (
           <Icon.Ionicons
@@ -68,7 +85,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 5,
   },
-  profileEmail: {
+  profileContact: {
     fontSize: 16,
     fontWeight: '300',
   },

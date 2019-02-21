@@ -13,7 +13,6 @@ import {
   AsyncStorage,
   Dimensions,
   ActivityIndicator,
-  Modal,
   Animated,
 } from 'react-native'
 import { WebBrowser, MapView, Location } from 'expo'
@@ -57,6 +56,10 @@ export default class HomeScreen extends React.Component {
       inCar: false,
       awaitingRequest: false,
     }
+  }
+
+  componentDidMount() {
+    this._getLocationNameAsync()
   }
 
   scrollX = new Animated.Value(0)
@@ -228,13 +231,7 @@ export default class HomeScreen extends React.Component {
           longitude: location.longitude,
         }
 
-        if (Platform.OS === 'android') {
-          if (this.driver) {
-            this.driver._component.animateMarkerToCoordinate(newCoordinate, 500)
-          }
-        } else {
-          driverLocation.timing(newCoordinate).start()
-        }
+        driverLocation.timing(newCoordinate).start()
       })
   }
 
@@ -365,13 +362,18 @@ export default class HomeScreen extends React.Component {
               title={'Current Location'}
               description={this.state.address}
               draggable={this.state.request === null}
+              onPress={() => this.start.showCallout()}
               onDrag={({ nativeEvent }) => {
                 this.setState({
                   latitude: nativeEvent.coordinate.latitude,
                   longitude: nativeEvent.coordinate.longitude,
                 })
               }}
-              onDragEnd={() => this._getLocationNameAsync()}
+              onDragEnd={() => {
+                this._getLocationNameAsync()
+                this.start.hideCallout()
+              }}
+              ref={start => (this.start = start)}
             />
           )}
           <MapView.Marker
@@ -380,13 +382,18 @@ export default class HomeScreen extends React.Component {
             description={this.state.endAddress}
             draggable={this.state.request === null}
             pinColor="#0061ff"
+            onPress={() => this.end.showCallout()}
             onDrag={({ nativeEvent }) => {
               this.setState({
                 endLatitude: nativeEvent.coordinate.latitude,
                 endLongitude: nativeEvent.coordinate.longitude,
               })
             }}
-            onDragEnd={() => this._getLocationNameAsync()}
+            onDragEnd={() => {
+              this._getLocationNameAsync()
+              this.end.hideCallout()
+            }}
+            ref={end => (this.end = end)}
           />
           {this.state.request && this.state.request.location && (
             <MapView.Marker.Animated
@@ -407,13 +414,24 @@ export default class HomeScreen extends React.Component {
               origin={location}
               destination={endLocation}
               apikey="AIzaSyAAC1h8dkCQCYZ5hLa8Z5Afkvep9AJ4kFk"
+              resetOnChange={false}
             />
           )}
+          {this.state.request &&
+            this.state.request.status === 'in_progress' && (
+              <MapViewDirections
+                origin={driverLocation}
+                destination={endLocation}
+                apikey="AIzaSyAAC1h8dkCQCYZ5hLa8Z5Afkvep9AJ4kFk"
+                resetOnChange={false}
+              />
+            )}
           {this.state.request && this.state.request.status === 'accepted' && (
             <MapViewDirections
               origin={driverLocation}
               destination={location}
               apikey="AIzaSyAAC1h8dkCQCYZ5hLa8Z5Afkvep9AJ4kFk"
+              resetOnChange={false}
             />
           )}
         </MapView>

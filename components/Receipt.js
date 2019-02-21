@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { StyleSheet, View, Modal, Text, Button } from 'react-native'
 
 const Receipt = ({ visible, receipt, handleDone, ...props }) => (
-  <Modal visible={visible} {...props}>
+  <Modal visible={visible} {...props} onRequestClose={handleDone}>
     <View style={styles.receiptModalView}>
       <Text style={styles.receiptModalTitle}>Trip Completed!</Text>
       <Text style={styles.receiptModalText}>

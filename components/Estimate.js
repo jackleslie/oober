@@ -9,7 +9,7 @@ const Estimate = ({
   handleCancel,
   ...props
 }) => (
-  <Modal visible={visible} {...props}>
+  <Modal visible={visible} {...props} onRequestClose={handleCancel}>
     <View style={styles.estimateModalView}>
       <View>
         <Text style={styles.estimateModalTitle}>
