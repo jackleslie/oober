@@ -361,7 +361,10 @@ export default class HomeScreen extends React.Component {
               coordinate={location}
               title={'Current Location'}
               description={this.state.address}
-              draggable={this.state.request === null}
+              draggable={
+                this.state.request === null &&
+                this.state.requestEstimate === null
+              }
               onPress={() => this.start.showCallout()}
               onDrag={({ nativeEvent }) => {
                 this.setState({
@@ -380,7 +383,9 @@ export default class HomeScreen extends React.Component {
             coordinate={endLocation}
             title={'Destination'}
             description={this.state.endAddress}
-            draggable={this.state.request === null}
+            draggable={
+              this.state.request === null && this.state.requestEstimate === null
+            }
             pinColor="#0061ff"
             onPress={() => this.end.showCallout()}
             onDrag={({ nativeEvent }) => {
@@ -448,28 +453,6 @@ export default class HomeScreen extends React.Component {
             style={{ padding: 40 }}
           />
         )}
-        {this.state.requestEstimate && (
-          <Estimate
-            visible={this.state.requestEstimate !== null}
-            estimate={this.state.requestEstimate}
-            handleRequest={() => {
-              this._handleUberRequestAsync(
-                this.state.requestEstimate.product_id,
-                this.state.requestEstimate.fare.fare_id
-              )
-            }}
-            handleCancel={() => {
-              this.setState({
-                requestEstimate: null,
-                awaitingRequest: false,
-              })
-            }}
-            animationType="fade"
-            transparent={false}
-            presentationStyle="overFullScreen"
-            transparent
-          />
-        )}
         <View
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
@@ -496,9 +479,26 @@ export default class HomeScreen extends React.Component {
                       />
                     ))
                   ) : (
-                    <ActivityIndicator
-                      size="large"
-                      style={[styles.productIndicator, { width: screenWidth }]}
+                    <Estimate
+                      visible={this.state.requestEstimate !== null}
+                      estimate={this.state.requestEstimate}
+                      handleRequest={() => {
+                        this._handleUberRequestAsync(
+                          this.state.requestEstimate.product_id,
+                          this.state.requestEstimate.fare.fare_id
+                        )
+                      }}
+                      handleCancel={() => {
+                        this.setState({
+                          requestEstimate: null,
+                          awaitingRequest: false,
+                        })
+                      }}
+                      animationType="fade"
+                      transparent={false}
+                      presentationStyle="overFullScreen"
+                      transparent
+                      screenWidth={screenWidth}
                     />
                   )
                 ) : (
@@ -646,12 +646,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   requestStatusContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   status: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

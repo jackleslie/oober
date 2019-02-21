@@ -1,56 +1,64 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { StyleSheet, View, Modal, Text, Button } from 'react-native'
+import {
+  StyleSheet,
+  View,
+  Modal,
+  Text,
+  Button,
+  ActivityIndicator,
+} from 'react-native'
 
 const Estimate = ({
   visible,
   estimate,
   handleRequest,
   handleCancel,
+  screenWidth,
   ...props
-}) => (
-  <Modal visible={visible} {...props} onRequestClose={handleCancel}>
-    <View style={styles.estimateModalView}>
-      <View>
-        <Text style={styles.estimateModalTitle}>
-          {estimate.fare.display} • {estimate.trip.distance_estimate}{' '}
-          {estimate.trip.distance_unit}(s)
-        </Text>
-        <Text style={styles.estimateModalText}>
-          Pickup ETA{' '}
-          {estimate.pickup_estimate
-            ? `${estimate.pickup_estimate} minute(s)`
-            : 'TBC'}
-        </Text>
-        <View style={styles.buttonRow}>
-          <Button
-            style={styles.productButton}
-            title="Request"
-            onPress={handleRequest}
-          />
-          <Button
-            style={styles.productButton}
-            title="Cancel"
-            onPress={handleCancel}
-          />
-        </View>
+}) =>
+  estimate ? (
+    <View style={[styles.estimateContainer, { width: screenWidth }]}>
+      <Text style={styles.estimateTitle}>
+        {estimate.fare.display} • {estimate.trip.distance_estimate}{' '}
+        {estimate.trip.distance_unit}(s)
+      </Text>
+      <Text style={styles.estimateText}>
+        Pickup ETA{' '}
+        {estimate.pickup_estimate
+          ? `${estimate.pickup_estimate} minute(s)`
+          : 'TBC'}
+      </Text>
+      <View style={styles.buttonRow}>
+        <Button
+          style={styles.productButton}
+          title="Request"
+          onPress={handleRequest}
+        />
+        <Button
+          style={styles.productButton}
+          title="Cancel"
+          onPress={handleCancel}
+        />
       </View>
     </View>
-  </Modal>
-)
+  ) : (
+    <ActivityIndicator
+      size="large"
+      style={[styles.productIndicator, { width: screenWidth }]}
+    />
+  )
 
 const styles = StyleSheet.create({
-  estimateModalView: {
-    paddingTop: 60,
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
+  estimateContainer: {
+    paddingVertical: 5,
+    justifyContent: 'center',
   },
-  estimateModalTitle: {
+  estimateTitle: {
     textAlign: 'center',
     fontSize: 30,
   },
-  estimateModalText: {
+  estimateText: {
     textAlign: 'center',
     fontSize: 18,
   },
@@ -61,9 +69,10 @@ const styles = StyleSheet.create({
 })
 
 Estimate.propTypes = {
-  estimate: PropTypes.object.isRequired,
+  estimate: PropTypes.object,
   handleRequest: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
+  screenWidth: PropTypes.number.isRequired,
   visible: PropTypes.bool,
 }
 

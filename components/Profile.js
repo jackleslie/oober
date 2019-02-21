@@ -25,13 +25,13 @@ const Profile = ({
       <Text style={styles.profileName}>{name}</Text>
       {isDriver ? (
         <Text
-          style={styles.profileContact}
+          style={styles.profileNumber}
           onPress={() => Linking.openURL(`tel:${contact}`)}
         >
           {contact}
         </Text>
       ) : (
-        <Text style={styles.profileContact}>{contact}</Text>
+        <Text style={styles.profileEmail}>{contact}</Text>
       )}
       <View style={styles.profileVerified}>
         {verified ? (
@@ -85,9 +85,14 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 5,
   },
-  profileContact: {
+  profileEmail: {
     fontSize: 16,
     fontWeight: '300',
+  },
+  profileNumber: {
+    fontSize: 16,
+    fontWeight: '300',
+    color: '#007aff',
   },
   profileVerified: {
     flex: 1,
