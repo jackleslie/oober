@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   Animated,
   Alert,
+  TextInput,
 } from 'react-native'
 import { WebBrowser, MapView, Location } from 'expo'
 import MapViewDirections from 'react-native-maps-directions'
@@ -56,6 +57,7 @@ export default class HomeScreen extends React.Component {
       receipt: null,
       inCar: false,
       awaitingRequest: false,
+      textBoxAddress: null,
     }
   }
 
@@ -126,6 +128,19 @@ export default class HomeScreen extends React.Component {
           endAddress: results[0].name,
         })
         return this._bootstrapAsync()
+      })
+      .catch(console.log)
+  }
+
+  _getEndLocationLatLngAsync = async place => {
+    Location.geocodeAsync(place)
+      .then(results => {
+        console.log(results)
+        this.setState({
+          endLatitude: results[0].latitude,
+          endLongitude: results[0].longitude,
+        })
+        return this._getLocationNameAsync()
       })
       .catch(console.log)
   }
@@ -363,7 +378,11 @@ export default class HomeScreen extends React.Component {
     return this.state.latitude ? (
       <>
         <MapView
-          style={{ flex: 5 }}
+          style={{
+            flex: 5,
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+          }}
           initialRegion={{
             latitude: this.state.latitude,
             longitude: this.state.longitude,
@@ -371,6 +390,18 @@ export default class HomeScreen extends React.Component {
             longitudeDelta: 0.0421,
           }}
         >
+          <TextInput
+            onChangeText={val => this.setState({ textBoxAddress: val })}
+            style={styles.textInput}
+            placeholder={this.state.endAddress}
+            onSubmitEditing={event =>
+              this._getEndLocationLatLngAsync(event.nativeEvent.text)
+            }
+            ref={textInput => (this.textInput = textInput)}
+            autoComplete="street-address"
+            editable={!this.state.awaitingRequest && !this.state.request}
+            returnKeyType="go"
+          />
           {!this.state.inCar && (
             <MapView.Marker
               coordinate={location}
@@ -412,6 +443,7 @@ export default class HomeScreen extends React.Component {
             onDragEnd={() => {
               this._getLocationNameAsync()
               this.end.hideCallout()
+              this.textInput.clear()
             }}
             ref={end => (this.end = end)}
           />
@@ -638,6 +670,20 @@ export default class HomeScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  textInput: {
+    width: Layout.window.width * 0.85,
+    height: 50,
+    borderRadius: 1,
+    backgroundColor: '#fff',
+    marginTop: 80,
+    fontSize: 21,
+    fontWeight: '300',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    paddingHorizontal: 12,
+  },
   productContainer: {
     justifyContent: 'center',
     alignItems: 'center',
