@@ -1,44 +1,103 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { StyleSheet, View, Text } from 'react-native'
-import PureChart from 'react-native-pure-chart'
-import generate from 'string-to-color'
+import { VictoryPie, VictoryBar } from 'victory-native'
+import moment from 'moment'
 
 const Analytics = ({ history }) => {
-  let data = {}
-  history.history.forEach(ride => {
+  let pieData = {}
+  let chartData = {
+    Jan: {
+      x: 'Jan',
+      y: 0,
+    },
+    Feb: {
+      x: 'Feb',
+      y: 0,
+    },
+    Mar: {
+      x: 'Mar',
+      y: 0,
+    },
+    Apr: {
+      x: 'Apr',
+      y: 0,
+    },
+    May: {
+      x: 'May',
+      y: 0,
+    },
+    Jun: {
+      x: 'Jun',
+      y: 0,
+    },
+    Jul: {
+      x: 'Jul',
+      y: 0,
+    },
+    Aug: {
+      x: 'Aug',
+      y: 0,
+    },
+    Sep: {
+      x: 'Sep',
+      y: 0,
+    },
+    Oct: {
+      x: 'Oct',
+      y: 0,
+    },
+    Nov: {
+      x: 'Nov',
+      y: 0,
+    },
+    Dec: {
+      x: 'Dec',
+      y: 0,
+    },
+  }
+  history.forEach(ride => {
     let key = ride.start_city.display_name
-    let entry = {
-      value: data[key] ? ++data[key].value : 1,
-      color: generate(key),
-      label: key,
+    let pieEntry = {
+      x: key,
+      y: pieData[key] ? ++pieData[key].y : 1,
     }
-    data[key] = entry
+    pieData[key] = pieEntry
+
+    let month = moment(ride.start_time, 'X').format('MMM')
+    let chartEntry = {
+      x: month,
+      y: ++chartData[month].y,
+    }
+    chartData[month] = chartEntry
   })
   return (
-    <View style={styles.profileAnalytics} pointerEvents="none">
-      <PureChart pointerEvents="none" data={Object.values(data)} type="pie" />
-      <View>
-        {Object.values(data).map((x, index) => (
-          <Text key={index} style={{ color: x.color }}>{`${x.label}: ${
-            x.value
-          }`}</Text>
-        ))}
+    <View>
+      <Text style={styles.chartTitle}>Trips per Location</Text>
+      <View pointerEvents="none">
+        <VictoryPie data={Object.values(pieData)} padding={75} />
+      </View>
+      <Text style={styles.chartTitle}>Trips by Month</Text>
+      <View pointerEvents="none" style={{ alignItems: 'center' }}>
+        <VictoryBar
+          data={Object.values(chartData)}
+          labels={d => `${d.x}:${d.y}`}
+          padding={50}
+        />
       </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  profileAnalytics: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+  chartTitle: {
+    fontSize: 21,
+    fontWeight: '300',
   },
 })
 
 Analytics.propTypes = {
-  history: PropTypes.object.isRequired,
+  history: PropTypes.array.isRequired,
 }
 
 export default Analytics

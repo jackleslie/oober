@@ -24,8 +24,8 @@ export default class ProfileScreen extends React.Component {
     this._bootstrapAsync()
     this.state = {
       userInfo: null,
-      history: null,
-      loaded: false,
+      historicalData: null,
+      more: false,
     }
   }
 
@@ -56,29 +56,13 @@ export default class ProfileScreen extends React.Component {
         headers: {
           Authorization: `Bearer ${this.userToken}`,
         },
-      })
-      .then(response => {
-        this.setState({
-          history: response.data,
-        })
-      })
-      .catch(console.log)
-  }
-
-  _handleUberGetMaxHistoryAsync = async () => {
-    axios
-      .get('https://api.uber.com/v1.2/history', {
-        headers: {
-          Authorization: `Bearer ${this.userToken}`,
-        },
         params: {
           limit: 50,
         },
       })
       .then(response => {
         this.setState({
-          history: response.data,
-          loaded: true,
+          historicalData: response.data,
         })
       })
       .catch(console.log)
@@ -90,10 +74,10 @@ export default class ProfileScreen extends React.Component {
   }
 
   render() {
-    const { userInfo, history, loaded } = this.state
+    const { userInfo, historicalData, more } = this.state
     return (
       <ScrollView style={styles.container}>
-        {userInfo && history ? (
+        {userInfo && historicalData ? (
           <>
             <Text style={[styles.userTitle, styles.title]}>User Info</Text>
             <Profile
@@ -105,27 +89,37 @@ export default class ProfileScreen extends React.Component {
                 userInfo.mobile_verified ? 'Verified' : 'Unverified'
               }
             />
+            <Button title="Sign Out" onPress={this._signOutAsync} />
             <Text style={[styles.pastTripsTitle, styles.title]}>
               Past Trips
             </Text>
-            <History history={history} />
-            {!loaded && (
+            <History
+              history={
+                more
+                  ? historicalData.history
+                  : historicalData.history.slice(0, 5)
+              }
+            />
+            {more ? (
               <Button
-                title="Load More"
-                onPress={this._handleUberGetMaxHistoryAsync}
+                title="Show Less"
+                onPress={() => this.setState({ more: false })}
+              />
+            ) : (
+              <Button
+                title={`Show More (${historicalData.history.length})`}
+                onPress={() => this.setState({ more: true })}
               />
             )}
             <Text style={[styles.analyticsTitle, styles.title]}>Analytics</Text>
-            <Analytics history={history} />
+            <Analytics history={historicalData.history} />
           </>
         ) : (
-          <ActivityIndicator size="large" />
+          <>
+            <ActivityIndicator size="large" />
+            <Button title="Sign Out" onPress={this._signOutAsync} />
+          </>
         )}
-        <Text />
-        <Button title="Sign Out" onPress={this._signOutAsync} />
-        <Text />
-        <Text />
-        <Text />
       </ScrollView>
     )
   }
@@ -138,15 +132,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '700',
-    paddingBottom: 10,
   },
   userTitle: {
     paddingTop: 5,
+    paddingBottom: 10,
   },
   pastTripsTitle: {
     paddingTop: 20,
+    paddingBottom: 10,
   },
   analyticsTitle: {
     paddingTop: 20,
+    paddingBottom: 5,
   },
 })

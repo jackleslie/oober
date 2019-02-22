@@ -5,7 +5,7 @@ import moment from 'moment'
 
 const History = ({ history }) => (
   <View style={styles.profileHistory}>
-    {history.history.map(ride => {
+    {history.map(ride => {
       return (
         <View key={ride.request_id} style={styles.history}>
           <Text style={styles.historyTitle}>
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
 })
 
 History.propTypes = {
-  history: PropTypes.object.isRequired,
+  history: PropTypes.array.isRequired,
 }
 
 export default History
