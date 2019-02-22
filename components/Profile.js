@@ -95,7 +95,6 @@ const styles = StyleSheet.create({
     color: '#007aff',
   },
   profileVerified: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
   },

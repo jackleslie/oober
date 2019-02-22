@@ -35,10 +35,10 @@ const styles = StyleSheet.create({
   },
   historyTitle: {
     fontSize: 24,
-    fontWeight: '400',
+    fontWeight: '500',
   },
   historyDateTime: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '300',
   },
 })

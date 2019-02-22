@@ -122,11 +122,7 @@ export default class ProfileScreen extends React.Component {
           <ActivityIndicator size="large" />
         )}
         <Text />
-        <Button
-          style={styles.signOutButton}
-          title="Sign Out"
-          onPress={this._signOutAsync}
-        />
+        <Button title="Sign Out" onPress={this._signOutAsync} />
         <Text />
         <Text />
         <Text />
@@ -142,20 +138,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '600',
+    paddingBottom: 10,
   },
   userTitle: {
     paddingTop: 5,
-    paddingBottom: 10,
   },
   pastTripsTitle: {
     paddingTop: 20,
-    paddingBottom: 5,
   },
   analyticsTitle: {
     paddingTop: 20,
-    paddingBottom: 5,
-  },
-  signOutButton: {
-    paddingTop: 120,
   },
 })

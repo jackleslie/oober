@@ -22,7 +22,8 @@
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
     "react-native-maps-directions": "^1.6.0",
     "react-native-pure-chart": "0.0.24",
-    "react-navigation": "^3.0.9"
+    "react-navigation": "^3.0.9",
+    "string-to-color": "^2.0.1"
   },
   "devDependencies": {
     "babel-preset-expo": "^5.0.0",
