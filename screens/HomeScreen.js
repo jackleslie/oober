@@ -11,7 +11,6 @@ import {
   View,
   Linking,
   AsyncStorage,
-  Dimensions,
   ActivityIndicator,
   Animated,
   Alert,
@@ -19,13 +18,14 @@ import {
 import { WebBrowser, MapView, Location } from 'expo'
 import MapViewDirections from 'react-native-maps-directions'
 
-import { MonoText } from '../components/StyledText'
 import Profile from '../components/Profile'
 import Product from '../components/Product'
 import Receipt from '../components/Receipt'
 import Estimate from '../components/Estimate'
 import Driver from '../components/Driver'
 import LocationAccess from '../components/LocationAccess'
+
+import Layout from '../constants/Layout'
 
 import carImg from '../assets/images/Car.png'
 
@@ -358,7 +358,7 @@ export default class HomeScreen extends React.Component {
         latitude: this.state.request.location.latitude,
         longitude: this.state.request.location.longitude,
       }
-    let screenWidth = Dimensions.get('window').width
+    let screenWidth = Layout.window.width
     let position = Animated.divide(this.scrollX, screenWidth)
     return this.state.latitude ? (
       <>
@@ -472,7 +472,7 @@ export default class HomeScreen extends React.Component {
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
           <ScrollView
-            style={styles.productContainer}
+            contentContainerStyle={styles.productContainer}
             pagingEnabled
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -518,12 +518,7 @@ export default class HomeScreen extends React.Component {
                   )
                 ) : (
                   <>
-                    <View
-                      style={[
-                        styles.requestStatusContainer,
-                        { width: screenWidth },
-                      ]}
-                    >
+                    <View style={{ width: screenWidth }}>
                       <Text style={styles.statusTitle}>
                         Request {this.state.request.status}
                       </Text>
@@ -558,7 +553,7 @@ export default class HomeScreen extends React.Component {
                   </>
                 )
               ) : (
-                <View style={[styles.status, { width: screenWidth }]}>
+                <View style={{ width: screenWidth }}>
                   <Text style={styles.statusTitle}>No drivers available</Text>
                 </View>
               )
@@ -644,29 +639,12 @@ export default class HomeScreen extends React.Component {
 
 const styles = StyleSheet.create({
   productContainer: {
-    flex: 1,
-  },
-  codeHighlightText: {
-    color: 'rgba(96,100,109, 0.8)',
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-  },
-  requestContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingTop: 5,
-    justifyContent: 'space-around',
-  },
-  requestStatusContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  status: {
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   statusTitle: {
     fontSize: 24,

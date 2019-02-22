@@ -4,7 +4,7 @@ import { StyleSheet, View, Image, Text, Button } from 'react-native'
 
 const Product = ({ product, screenWidth, handleChoose }) => (
   <View style={[styles.product, { width: screenWidth }]}>
-    <View style={{ flexDirection: 'row' }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
       <Text style={styles.productTitle}>{product.display_name}</Text>
       <Image
         source={{ uri: product.image }}
@@ -13,20 +13,13 @@ const Product = ({ product, screenWidth, handleChoose }) => (
       />
     </View>
     <Text style={styles.productDescription}>{product.description}</Text>
-    <Button
-      style={styles.productButton}
-      title="Choose"
-      onPress={() => handleChoose(product.product_id)}
-    />
+    <Button title="Choose" onPress={() => handleChoose(product.product_id)} />
   </View>
 )
 
 const styles = StyleSheet.create({
   product: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 15,
+    paddingTop: 10,
   },
   productIndicator: {
     flex: 1,
@@ -36,9 +29,6 @@ const styles = StyleSheet.create({
   productImage: {
     width: 30,
     height: 30,
-  },
-  productButton: {
-    marginTop: -15,
   },
   productTitle: {
     fontSize: 24,

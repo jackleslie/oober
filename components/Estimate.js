@@ -30,16 +30,8 @@ const Estimate = ({
           : 'TBC'}
       </Text>
       <View style={styles.buttonRow}>
-        <Button
-          style={styles.productButton}
-          title="Request"
-          onPress={handleRequest}
-        />
-        <Button
-          style={styles.productButton}
-          title="Cancel"
-          onPress={handleCancel}
-        />
+        <Button title="Request" onPress={handleRequest} />
+        <Button title="Cancel" onPress={handleCancel} />
       </View>
     </View>
   ) : (
@@ -51,7 +43,6 @@ const Estimate = ({
 
 const styles = StyleSheet.create({
   estimateContainer: {
-    paddingVertical: 5,
     justifyContent: 'center',
   },
   estimateTitle: {

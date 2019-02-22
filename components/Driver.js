@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { StyleSheet, View, Image, Text } from 'react-native'
 
-import Profile from '../components/Profile'
+import Profile from './Profile'
 
 const Driver = ({ driver, vehicle, screenWidth }) => (
   <View style={[styles.requestContainer, { width: screenWidth }]}>
@@ -32,19 +32,9 @@ const Driver = ({ driver, vehicle, screenWidth }) => (
 
 const styles = StyleSheet.create({
   requestContainer: {
-    flex: 1,
     flexDirection: 'row',
-    paddingVertical: 5,
-    paddingLeft: 10,
-  },
-  requestStatusContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  vehicleContainer: {
-    flex: 1,
-    paddingTop: 15,
+    paddingHorizontal: 10,
+    paddingTop: 20,
   },
   vehicleImage: {
     flex: 1,

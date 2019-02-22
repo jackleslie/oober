@@ -95,7 +95,7 @@ export default class ProfileScreen extends React.Component {
       <ScrollView style={styles.container}>
         {userInfo && history ? (
           <>
-            <Text style={[styles.userTitle, styles.title]}>Me</Text>
+            <Text style={[styles.userTitle, styles.title]}>User Info</Text>
             <Profile
               picture={userInfo.picture}
               name={`${userInfo.first_name} ${userInfo.last_name}`}
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '600',
+    fontWeight: '700',
     paddingBottom: 10,
   },
   userTitle: {

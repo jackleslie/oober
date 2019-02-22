@@ -34,11 +34,11 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   historyTitle: {
-    fontSize: 24,
+    fontSize: 21,
     fontWeight: '500',
   },
   historyDateTime: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '300',
   },
 })
