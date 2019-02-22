@@ -14,6 +14,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Animated,
+  Alert,
 } from 'react-native'
 import { WebBrowser, MapView, Location } from 'expo'
 import MapViewDirections from 'react-native-maps-directions'
@@ -177,33 +178,47 @@ export default class HomeScreen extends React.Component {
         end_latitude: this.state.endLatitude,
         end_longitude: this.state.endLongitude,
       },
-    }).then(response => {
-      console.log(response.data)
-      this.setState({
-        requestEstimate: null,
-        request: response.data,
-        awaitingRequest: false,
-      })
-      return axios({
-        method: 'put',
-        url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
-          response.data.request_id
-        }`,
-        headers: {
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        data: {
-          status: 'accepted',
-        },
-      }).then(response => {
-        console.log(response.data)
-        this.interval = setInterval(
-          () => this._handleUberRequestReloadAsync(response.data.request_id),
-          2000
-        )
-      })
     })
+      .then(response => {
+        console.log(response.data)
+        this.setState({
+          requestEstimate: null,
+          request: response.data,
+          awaitingRequest: false,
+        })
+        return axios({
+          method: 'put',
+          url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
+            response.data.request_id
+          }`,
+          headers: {
+            Authorization: `Bearer ${this.userToken}`,
+          },
+          data: {
+            status: 'accepted',
+          },
+        }).then(response => {
+          console.log(response.data)
+          this.interval = setInterval(
+            () => this._handleUberRequestReloadAsync(response.data.request_id),
+            2000
+          )
+        })
+      })
+      .catch(error => {
+        if (error.response) {
+          if (error.response.status === 409) {
+            Alert.alert(
+              'Trip Already Active',
+              'Please cancel or complete current trip',
+              { cancelable: false }
+            )
+          }
+        }
+      })
   }
+
+  _handleUber
 
   _handleUberRequestReloadAsync = async request_id => {
     axios
