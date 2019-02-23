@@ -23,7 +23,7 @@ export default class SignInScreen extends React.Component {
   handleUberLogin = async () => {
     let redirectUrl = await AuthSession.getRedirectUrl()
     let results = await AuthSession.startAsync({
-      authUrl: `https://login.uber.com/oauth/v2/authorize?response_type=code&client_id=jloIvMctI2Pnd3lbrKNpqpDiSfJD8SPk&scope=profile+history+ride_widgets+request+request_receipt&redirect_uri=${encodeURIComponent(
+      authUrl: `https://login.uber.com/oauth/v2/authorize?response_type=code&client_id=jloIvMctI2Pnd3lbrKNpqpDiSfJD8SPk&scope=profile+history+request+request_receipt&redirect_uri=${encodeURIComponent(
         redirectUrl
       )}`,
     })
@@ -39,7 +39,7 @@ export default class SignInScreen extends React.Component {
           grant_type: 'authorization_code',
           redirect_uri: redirectUrl,
           code: results.params.code,
-          scope: 'profile+history+ride_widgets+request+request_receipt',
+          scope: 'profile+history+request+request_receipt',
         },
       })
         .then(response => {

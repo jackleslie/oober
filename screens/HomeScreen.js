@@ -57,6 +57,7 @@ export default class HomeScreen extends React.Component {
       receipt: null,
       inCar: false,
       awaitingRequest: false,
+      hideTextbox: false,
       textBoxAddress: null,
     }
   }
@@ -200,6 +201,7 @@ export default class HomeScreen extends React.Component {
           requestEstimate: null,
           request: response.data,
           awaitingRequest: false,
+          hideTextbox: true,
         })
         return axios({
           method: 'put',
@@ -392,7 +394,11 @@ export default class HomeScreen extends React.Component {
         >
           <TextInput
             onChangeText={val => this.setState({ textBoxAddress: val })}
-            style={styles.textInput}
+            style={[
+              styles.textInput,
+              (this.state.awaitingRequest || this.state.hideTextbox) &&
+                styles.textInputHide,
+            ]}
             placeholder={this.state.endAddress}
             onSubmitEditing={event =>
               this._getEndLocationLatLngAsync(event.nativeEvent.text)
@@ -494,6 +500,8 @@ export default class HomeScreen extends React.Component {
             handleDone={() =>
               this.setState({
                 receipt: null,
+                awaitingRequest: false,
+                hideTextbox: false,
               })
             }
             animationType="slide"
@@ -683,6 +691,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     paddingHorizontal: 12,
+  },
+  textInputHide: {
+    opacity: 0,
   },
   productContainer: {
     justifyContent: 'center',
