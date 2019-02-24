@@ -105,7 +105,7 @@ export default class HomeScreen extends React.Component {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         })
-        this._getLocationNameAsync()
+        return this._getLocationNameAsync()
       })
       .catch(console.log)
   }
@@ -175,7 +175,7 @@ export default class HomeScreen extends React.Component {
         this.setState({
           awaitingRequest: false,
         })
-        console.log(JSON.stringify(err))
+        console.log(err)
       })
   }
 
@@ -235,8 +235,6 @@ export default class HomeScreen extends React.Component {
       })
   }
 
-  _handleUber
-
   _handleUberRequestReloadAsync = async request_id => {
     axios
       .get(
@@ -265,6 +263,7 @@ export default class HomeScreen extends React.Component {
 
         driverLocation.timing(newCoordinate).start()
       })
+      .catch(console.log)
   }
 
   _handleUberCancelRequestAsync = async () => {
@@ -274,14 +273,16 @@ export default class HomeScreen extends React.Component {
       headers: {
         Authorization: `Bearer ${this.userToken}`,
       },
-    }).then(() => {
-      this.setState({
-        requestEstimate: null,
-        request: null,
-        inCar: false,
-      })
-      clearInterval(this.interval)
     })
+      .then(() => {
+        this.setState({
+          requestEstimate: null,
+          request: null,
+          inCar: false,
+        })
+        clearInterval(this.interval)
+      })
+      .catch(console.log)
   }
 
   _handleUberInCarAsync = async () => {
@@ -316,6 +317,7 @@ export default class HomeScreen extends React.Component {
           inCar: true,
         })
       })
+      .catch(console.log)
   }
 
   _handleUberTripEndAsync = async () => {
@@ -357,7 +359,7 @@ export default class HomeScreen extends React.Component {
           receipt: response.data,
         })
       })
-      .catch(err => console.log(JSON.stringify(err)))
+      .catch(console.log)
   }
 
   render() {
