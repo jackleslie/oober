@@ -33,13 +33,17 @@ import carImg from '../assets/images/Car.png'
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props)
+
+    LATITUDE = 37.762009
+    LONGITUDE = -122.434677
+
     // this._getLocationAsync()
     this._bootstrapAsync()
     this.state = {
-      latitude: 37.762009,
-      longitude: -122.434677,
-      endLatitude: 37.762009 - 0.01,
-      endLongitude: -122.434677 - 0.01,
+      latitude: LATITUDE,
+      longitude: LONGITUDE,
+      endLatitude: LATITUDE - 0.01,
+      endLongitude: LONGITUDE - 0.01,
       route: null,
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
@@ -51,14 +55,15 @@ export default class HomeScreen extends React.Component {
       request: null,
       driver: null,
       driverLocation: new MapView.AnimatedRegion({
-        latitude: 37.762009,
-        longitude: -122.434677,
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
       }),
       receipt: null,
       inCar: false,
       awaitingRequest: false,
       hideTextbox: false,
       textBoxAddress: null,
+      locationAllowed: true,
     }
   }
 
@@ -89,13 +94,16 @@ export default class HomeScreen extends React.Component {
           products: results.data.products,
         })
       })
+      .catch(console.log)
   }
 
   _onRefresh = () => {
     this.setState({ refreshing: true })
-    this._getLocationAsync().then(() => {
-      this.setState({ refreshing: false })
-    })
+    this._getLocationAsync()
+      .then(() => {
+        this.setState({ refreshing: false, locationAllowed: true })
+      })
+      .catch(() => this.setState({ locationAllowed: false }))
   }
 
   _getLocationAsync = async () => {
@@ -104,10 +112,16 @@ export default class HomeScreen extends React.Component {
         this.setState({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
+          locationAllowed: true,
         })
         return this._getLocationNameAsync()
       })
-      .catch(console.log)
+      .catch(err => {
+        this.setState({
+          locationAllowed: false,
+        })
+        console.log(err)
+      })
   }
 
   _getLocationNameAsync = async () => {
@@ -117,7 +131,7 @@ export default class HomeScreen extends React.Component {
     })
       .then(results => {
         this.setState({
-          address: results[0].name,
+          address: `${results[0].name}, ${results[0].region}`,
         })
         return Location.reverseGeocodeAsync({
           latitude: this.state.endLatitude,
@@ -125,8 +139,9 @@ export default class HomeScreen extends React.Component {
         })
       })
       .then(results => {
+        console.log(results)
         this.setState({
-          endAddress: results[0].name,
+          endAddress: `${results[0].name}, ${results[0].region}`,
         })
         return this._bootstrapAsync()
       })
@@ -379,7 +394,7 @@ export default class HomeScreen extends React.Component {
       }
     let screenWidth = Layout.window.width
     let position = Animated.divide(this.scrollX, screenWidth)
-    return this.state.latitude ? (
+    return this.state.locationAllowed ? (
       <>
         <MapView
           style={{
@@ -394,22 +409,6 @@ export default class HomeScreen extends React.Component {
             longitudeDelta: 0.0421,
           }}
         >
-          <TextInput
-            onChangeText={val => this.setState({ textBoxAddress: val })}
-            style={[
-              styles.textInput,
-              (this.state.awaitingRequest || this.state.hideTextbox) &&
-                styles.textInputHide,
-            ]}
-            placeholder={this.state.endAddress}
-            onSubmitEditing={event =>
-              this._getEndLocationLatLngAsync(event.nativeEvent.text)
-            }
-            ref={textInput => (this.textInput = textInput)}
-            autoComplete="street-address"
-            editable={!this.state.awaitingRequest && !this.state.request}
-            returnKeyType="go"
-          />
           {!this.state.inCar && (
             <MapView.Marker
               coordinate={location}
@@ -494,6 +493,22 @@ export default class HomeScreen extends React.Component {
               resetOnChange={false}
             />
           )}
+          <TextInput
+            onChangeText={val => this.setState({ textBoxAddress: val })}
+            style={[
+              styles.textInput,
+              (this.state.awaitingRequest || this.state.hideTextbox) &&
+                styles.textInputHide,
+            ]}
+            placeholder={this.state.endAddress}
+            onSubmitEditing={event =>
+              this._getEndLocationLatLngAsync(event.nativeEvent.text)
+            }
+            ref={textInput => (this.textInput = textInput)}
+            autoComplete="street-address"
+            editable={!this.state.awaitingRequest && !this.state.request}
+            returnKeyType="go"
+          />
         </MapView>
         {this.state.receipt && (
           <Receipt
@@ -673,7 +688,9 @@ export default class HomeScreen extends React.Component {
       <LocationAccess
         refreshing={this.state.refreshing}
         handleRefresh={this._onRefresh}
-        handleLink={() => Linking.openURL('app-settings:')}
+        handleLink={() =>
+          Platform.OS === 'ios' && Linking.openURL('app-settings:')
+        }
       />
     )
   }
