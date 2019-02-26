@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Android Uber Client",
-    "slug": "android-uber-client",
+    "name": "Oober",
+    "slug": "oober",
     "privacy": "public",
     "sdkVersion": "32.0.0",
     "platforms": ["ios", "android"],
@@ -20,7 +20,14 @@
     "ios": {
       "supportsTablet": true
     },
-    "description": "CS3301 Component Technology, Practical 1: Android App Development",
-    "githubUrl": "https://github.com/jackleslie/android-uber-client"
+    "description": "React Native Uber Client",
+    "githubUrl": "https://github.com/jackleslie/oober",
+    "orientation": "portrait",
+    "ios": {
+      "bundleIdentifier": "com.jackleslie.oober"
+    },
+    "android": {
+      "package": "com.jackleslie.oober"
+    }
   }
 }
