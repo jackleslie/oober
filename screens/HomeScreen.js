@@ -37,7 +37,10 @@ export default class HomeScreen extends React.Component {
     LATITUDE = 37.762009
     LONGITUDE = -122.434677
 
+    // The following line enables current location tracking, skipping it
+    // simulates a fake location
     // this._getLocationAsync()
+
     this._bootstrapAsync()
     this.state = {
       latitude: LATITUDE,

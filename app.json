@@ -18,14 +18,10 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.jackleslie.oober"
     },
     "description": "React Native Uber Client",
     "githubUrl": "https://github.com/jackleslie/oober",
-    "orientation": "portrait",
-    "ios": {
-      "bundleIdentifier": "com.jackleslie.oober"
-    },
     "android": {
       "package": "com.jackleslie.oober"
     },
