@@ -44,16 +44,12 @@ export default class HomeScreen extends React.Component {
       longitude: LONGITUDE,
       endLatitude: LATITUDE - 0.01,
       endLongitude: LONGITUDE - 0.01,
-      route: null,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
       address: null,
       endAddress: null,
       refreshing: false,
       products: null,
       requestEstimate: null,
       request: null,
-      driver: null,
       driverLocation: new MapView.AnimatedRegion({
         latitude: LATITUDE,
         longitude: LONGITUDE,
@@ -94,7 +90,7 @@ export default class HomeScreen extends React.Component {
           products: results.data.products,
         })
       })
-      .catch(console.log)
+      .catch(this._handleErrorResponse)
   }
 
   _onRefresh = () => {
@@ -161,6 +157,28 @@ export default class HomeScreen extends React.Component {
       .catch(console.log)
   }
 
+  _handleErrorResponse = error => {
+    if (error.response) {
+      if (error.response.status === 409) {
+        Alert.alert(
+          'Trip Already Active',
+          'Please cancel or complete current trip'
+        )
+      } else if (error.response.status === 422) {
+        Alert.alert(
+          'Invalid Trip',
+          'Please try another pickup location and/or desintation'
+        )
+      } else if (error.response.status === 403) {
+        Alert.alert(
+          'Blocked',
+          'You are either forbidden to make trips or unverified, please contact Uber Support'
+        )
+      }
+    }
+    console.log(error)
+  }
+
   _handleUberSelectAsync = async product_id => {
     await this.setState({
       awaitingRequest: true,
@@ -182,15 +200,25 @@ export default class HomeScreen extends React.Component {
       .then(response => {
         response.data.product_id = product_id
         console.log(response.data)
-        this.setState({
-          requestEstimate: response.data,
-        })
+        if (response.data.fare) {
+          this.setState({
+            requestEstimate: response.data,
+          })
+        } else {
+          this.setState({
+            awaitingRequest: false,
+          })
+          Alert.alert(
+            'Invalid Trip',
+            'Please try another pickup location and/or desintation'
+          )
+        }
       })
-      .catch(err => {
+      .catch(error => {
         this.setState({
           awaitingRequest: false,
         })
-        console.log(err)
+        this._handleErrorResponse(error)
       })
   }
 
@@ -237,17 +265,7 @@ export default class HomeScreen extends React.Component {
           )
         })
       })
-      .catch(error => {
-        if (error.response) {
-          if (error.response.status === 409) {
-            Alert.alert(
-              'Trip Already Active',
-              'Please cancel or complete current trip',
-              { cancelable: false }
-            )
-          }
-        }
-      })
+      .catch(this._handleErrorResponse)
   }
 
   _handleUberRequestReloadAsync = async request_id => {
@@ -278,10 +296,11 @@ export default class HomeScreen extends React.Component {
 
         driverLocation.timing(newCoordinate).start()
       })
-      .catch(console.log)
+      .catch(this._handleErrorResponse)
   }
 
   _handleUberCancelRequestAsync = async () => {
+    clearInterval(this.interval)
     axios({
       method: 'delete',
       url: 'https://sandbox-api.uber.com/v1.2/requests/current',
@@ -294,10 +313,10 @@ export default class HomeScreen extends React.Component {
           requestEstimate: null,
           request: null,
           inCar: false,
+          hideTextbox: false,
         })
-        clearInterval(this.interval)
       })
-      .catch(console.log)
+      .catch(this._handleErrorResponse)
   }
 
   _handleUberInCarAsync = async () => {
@@ -332,10 +351,11 @@ export default class HomeScreen extends React.Component {
           inCar: true,
         })
       })
-      .catch(console.log)
+      .catch(this._handleErrorResponse)
   }
 
   _handleUberTripEndAsync = async () => {
+    clearInterval(this.interval)
     axios({
       method: 'put',
       url: `https://sandbox-api.uber.com/v1.2/sandbox/requests/${
@@ -353,7 +373,6 @@ export default class HomeScreen extends React.Component {
           latitude: this.state.request.location.latitude,
           longitude: this.state.request.location.longitude,
         })
-        clearInterval(this.interval)
         this._getLocationNameAsync()
         return axios.get(
           `https://sandbox-api.uber.com/v1.2/requests/${
@@ -374,7 +393,7 @@ export default class HomeScreen extends React.Component {
           receipt: response.data,
         })
       })
-      .catch(console.log)
+      .catch(this._handleErrorResponse)
   }
 
   render() {
@@ -464,6 +483,7 @@ export default class HomeScreen extends React.Component {
               style={{
                 transform: [
                   { rotate: `${this.state.request.location.bearing}deg` },
+                  { scale: 0.33 },
                 ],
               }}
             />
