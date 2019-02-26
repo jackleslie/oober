@@ -28,6 +28,7 @@
     },
     "android": {
       "package": "com.jackleslie.oober"
-    }
+    },
+    "scheme": "oober"
   }
 }

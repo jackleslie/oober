@@ -7,6 +7,7 @@ import {
   View,
   AsyncStorage,
   Image,
+  Alert,
 } from 'react-native'
 import { AuthSession } from 'expo'
 
@@ -21,7 +22,7 @@ export default class SignInScreen extends React.Component {
   }
 
   handleUberLogin = async () => {
-    let redirectUrl = await AuthSession.getRedirectUrl()
+    let redirectUrl = AuthSession.getRedirectUrl()
     let results = await AuthSession.startAsync({
       authUrl: `https://login.uber.com/oauth/v2/authorize?response_type=code&client_id=jloIvMctI2Pnd3lbrKNpqpDiSfJD8SPk&scope=profile+history+request+request_receipt&redirect_uri=${encodeURIComponent(
         redirectUrl
@@ -46,7 +47,10 @@ export default class SignInScreen extends React.Component {
           AsyncStorage.setItem('userToken', response.data.access_token)
           this.props.navigation.navigate('Main')
         })
-        .catch(console.log)
+        .catch(error => {
+          this.setState({ didError: true })
+          console.log(error)
+        })
     }
   }
 
@@ -68,6 +72,11 @@ export default class SignInScreen extends React.Component {
             onPress={() => this.handleUberLogin()}
             title="Sign In / Create Account"
           />
+          {this.state.didError &&
+            Alert.alert('Error', 'Login unsuccessful, please try again later', {
+              text: 'OK',
+              onPress: () => this.setState({ didError: false }),
+            })}
         </View>
       </View>
     )
