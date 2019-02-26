@@ -2,6 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { StyleSheet, ScrollView, RefreshControl, Text } from 'react-native'
 
+/**
+ * Presentational component to prompt location access grant
+ */
 const LocationAccess = ({ refreshing, handleRefresh, handleLink }) => (
   <ScrollView
     contentContainerStyle={styles.container}
@@ -29,8 +32,17 @@ const styles = StyleSheet.create({
 })
 
 LocationAccess.propTypes = {
+  /**
+   * Determines if refresh control is in refreshing state
+   */
   refreshing: PropTypes.bool.isRequired,
+  /**
+   * Function to handle refreshing to see if location access has been granted
+   */
   handleRefresh: PropTypes.func.isRequired,
+  /**
+   * Function to handle link to location access granting page in settings
+   */
   handleLink: PropTypes.func.isRequired,
 }
 

@@ -9,16 +9,14 @@ import {
   ActivityIndicator,
 } from 'react-native'
 
-const Estimate = ({
-  visible,
-  estimate,
-  handleRequest,
-  handleCancel,
-  screenWidth,
-  ...props
-}) =>
+import Layout from '../constants/Layout'
+
+/**
+ * Presentational component displaying information about an Uber request estimate
+ */
+const Estimate = ({ estimate, handleRequest, handleCancel }) =>
   estimate ? (
-    <View style={[styles.estimateContainer, { width: screenWidth }]}>
+    <View style={[styles.estimateContainer, { width: Layout.window.width }]}>
       <Text style={styles.estimateTitle}>
         {estimate.fare.display} • {estimate.trip.distance_estimate}{' '}
         {estimate.trip.distance_unit}(s)
@@ -37,7 +35,7 @@ const Estimate = ({
   ) : (
     <ActivityIndicator
       size="large"
-      style={[styles.productIndicator, { width: screenWidth }]}
+      style={[styles.productIndicator, { width: Layout.window.width }]}
     />
   )
 
@@ -60,15 +58,23 @@ const styles = StyleSheet.create({
 })
 
 Estimate.propTypes = {
+  /**
+   * Request estimate object from Uber API
+   */
   estimate: PropTypes.object,
+  /**
+   * Function to handle making request to Uber API
+   */
   handleRequest: PropTypes.func.isRequired,
+  /**
+   * Function to handle cancelling request making process
+   * @type {[type]}
+   */
   handleCancel: PropTypes.func.isRequired,
-  screenWidth: PropTypes.number.isRequired,
-  visible: PropTypes.bool,
 }
 
 Estimate.defaultProps = {
-  visible: false,
+  estimate: null,
 }
 
 export default Estimate

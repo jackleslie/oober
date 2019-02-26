@@ -2,8 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { StyleSheet, View, Image, Text, Button } from 'react-native'
 
-const Product = ({ product, screenWidth, handleChoose }) => (
-  <View style={[styles.product, { width: screenWidth }]}>
+import Layout from '../constants/Layout'
+
+/**
+ * Presentational component displaying Uber product data
+ */
+const Product = ({ product, handleChoose }) => (
+  <View style={[styles.product, { width: Layout.window.width }]}>
     <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
       <Text style={styles.productTitle}>{product.display_name}</Text>
       <Image
@@ -45,8 +50,13 @@ const styles = StyleSheet.create({
 })
 
 Product.propTypes = {
+  /**
+   * Product object from Uber API
+   */
   product: PropTypes.object.isRequired,
-  screenWidth: PropTypes.number.isRequired,
+  /**
+   * Function to handle choosing specified product
+   */
   handleChoose: PropTypes.func.isRequired,
 }
 

@@ -4,8 +4,14 @@ import { StyleSheet, View, Image, Text } from 'react-native'
 
 import Profile from './Profile'
 
-const Driver = ({ driver, vehicle, screenWidth }) => (
-  <View style={[styles.requestContainer, { width: screenWidth }]}>
+import Layout from '../constants/Layout'
+import Colors from '../constants/Colors'
+
+/**
+ * Presentational component displaying information about an Uber driver
+ */
+const Driver = ({ driver, vehicle }) => (
+  <View style={[styles.requestContainer, { width: Layout.window.width }]}>
     <Profile
       picture={driver.picture_url}
       name={driver.name}
@@ -44,16 +50,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   vehicleLicensePlate: {
-    backgroundColor: '#fbce30',
+    backgroundColor: Colors.vehicleLicensePlate,
     fontWeight: '900',
     textAlign: 'center',
   },
 })
 
 Driver.propTypes = {
+  /**
+   * Driver object from Uber API
+   */
   driver: PropTypes.object.isRequired,
+  /**
+   * Vehicle object from Uber API
+   */
   vehicle: PropTypes.object.isRequired,
-  screenWidth: PropTypes.number.isRequired,
 }
 
 export default Driver

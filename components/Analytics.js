@@ -4,6 +4,9 @@ import { StyleSheet, View, Text } from 'react-native'
 import { VictoryPie, VictoryBar } from 'victory-native'
 import moment from 'moment'
 
+/**
+ * Presentational component displaying historical trip data as visualisations
+ */
 const Analytics = ({ history }) => {
   let pieData = {}
   let chartData = {
@@ -97,6 +100,9 @@ const styles = StyleSheet.create({
 })
 
 Analytics.propTypes = {
+  /**
+   * Array of trips from Uber API
+   */
   history: PropTypes.array.isRequired,
 }
 

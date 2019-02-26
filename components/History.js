@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import { StyleSheet, View, Text } from 'react-native'
 import moment from 'moment'
 
+/**
+ * Presentational component displaying historical trip data
+ */
 const History = ({ history }) => (
   <View style={styles.profileHistory}>
     {history.map(ride => {
@@ -44,6 +47,9 @@ const styles = StyleSheet.create({
 })
 
 History.propTypes = {
+  /**
+   * Array of trips from Uber API
+   */
   history: PropTypes.array.isRequired,
 }
 

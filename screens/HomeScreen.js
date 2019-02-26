@@ -167,7 +167,7 @@ export default class HomeScreen extends React.Component {
       } else if (error.response.status === 422) {
         Alert.alert(
           'Invalid Trip',
-          'Please try another pickup location and/or desintation'
+          'Please try another pickup location, desintation and/or product'
         )
       } else if (error.response.status === 403) {
         Alert.alert(
@@ -411,8 +411,7 @@ export default class HomeScreen extends React.Component {
         latitude: this.state.request.location.latitude,
         longitude: this.state.request.location.longitude,
       }
-    let screenWidth = Layout.window.width
-    let position = Animated.divide(this.scrollX, screenWidth)
+    let position = Animated.divide(this.scrollX, Layout.window.width)
     return this.state.locationAllowed ? (
       <>
         <MapView
@@ -566,13 +565,11 @@ export default class HomeScreen extends React.Component {
                       <Product
                         key={product.product_id}
                         product={product}
-                        screenWidth={screenWidth}
                         handleChoose={this._handleUberSelectAsync}
                       />
                     ))
                   ) : (
                     <Estimate
-                      visible={this.state.requestEstimate !== null}
                       estimate={this.state.requestEstimate}
                       handleRequest={() => {
                         this._handleUberRequestAsync(
@@ -586,16 +583,11 @@ export default class HomeScreen extends React.Component {
                           awaitingRequest: false,
                         })
                       }}
-                      animationType="fade"
-                      transparent={false}
-                      presentationStyle="overFullScreen"
-                      transparent
-                      screenWidth={screenWidth}
                     />
                   )
                 ) : (
                   <>
-                    <View style={{ width: screenWidth }}>
+                    <View style={styles.fullScreenWidth}>
                       <Text style={styles.statusTitle}>
                         Request {this.state.request.status}
                       </Text>
@@ -624,20 +616,19 @@ export default class HomeScreen extends React.Component {
                       <Driver
                         driver={this.state.request.driver}
                         vehicle={this.state.request.vehicle}
-                        screenWidth={screenWidth}
                       />
                     )}
                   </>
                 )
               ) : (
-                <View style={{ width: screenWidth }}>
+                <View style={styles.fullScreenWidth}>
                   <Text style={styles.statusTitle}>No drivers available</Text>
                 </View>
               )
             ) : (
               <ActivityIndicator
                 size="large"
-                style={[styles.productIndicator, { width: screenWidth }]}
+                style={[styles.productIndicator, styles.fullScreenWidth]}
               />
             )}
           </ScrollView>
@@ -747,5 +738,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
     paddingRight: 5,
+  },
+  fullScreenWidth: {
+    width: Layout.window.width,
   },
 })

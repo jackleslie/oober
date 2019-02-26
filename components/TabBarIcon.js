@@ -3,6 +3,9 @@ import { Icon } from 'expo'
 
 import Colors from '../constants/Colors'
 
+/**
+ * Presentational component displaying icon in tab bar
+ */
 const TabBarIcon = ({ ...props }) => (
   <Icon.Ionicons
     name={props.name}

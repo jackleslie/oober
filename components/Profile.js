@@ -11,6 +11,11 @@ import {
 } from 'react-native'
 import { Icon } from 'expo'
 
+import Colors from '../constants/Colors'
+
+/**
+ * Presentational component displaying various personal data
+ */
 const Profile = ({
   picture,
   name,
@@ -42,13 +47,13 @@ const Profile = ({
                 : 'md-checkmark-circle'
             }
             size={26}
-            color="#70C1B3"
+            color={Colors.checkmark}
           />
         ) : isDriver ? (
           <Icon.Ionicons
             name={Platform.OS === 'ios' ? 'ios-star' : 'md-star'}
             size={26}
-            color="#fbbc22"
+            color={Colors.star}
           />
         ) : (
           <Icon.Ionicons
@@ -56,7 +61,7 @@ const Profile = ({
               Platform.OS === 'ios' ? 'ios-close-circle' : 'md-close-circle'
             }
             size={26}
-            color="#F25F5C"
+            color={Colors.close}
           />
         )}
         <Text style={styles.profileVerifiedText}>{verifiedText}</Text>
@@ -92,7 +97,7 @@ const styles = StyleSheet.create({
   profileNumber: {
     fontSize: 16,
     fontWeight: '300',
-    color: '#007aff',
+    color: Colors.number,
   },
   profileVerified: {
     flexDirection: 'row',
@@ -105,11 +110,29 @@ const styles = StyleSheet.create({
 })
 
 Profile.propTypes = {
+  /**
+   * Profile picture
+   */
   picture: PropTypes.string.isRequired,
+  /**
+   * Profile name
+   */
   name: PropTypes.string,
+  /**
+   * Profile contact method
+   */
   contact: PropTypes.string,
+  /**
+   * Determines if driver or rider
+   */
   isDriver: PropTypes.bool,
+  /**
+   * Determines if verified via mobile
+   */
   verified: PropTypes.bool,
+  /**
+   * Text displayed next to verified status/star rating
+   */
   verifiedText: PropTypes.string,
 }
 
