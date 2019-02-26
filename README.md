@@ -8,8 +8,8 @@ the car it moves towards the destination specified either through placing a map 
 
 #### Getting Started
 
-To simply run the app on your mobile device without any fuss, install the Expo app through Play Store on Android or the 
-App Store on iOS. On your computer visit this link to access the published project.
+To simply run the app on your mobile device without any fuss, install the [Expo app](https://expo.io/tools#client) through Play Store on Android or the 
+App Store on iOS. On your computer visit [this link](https://expo.io/@jackleslie/oober) to access the published project.
 
 ##### On Android
 
