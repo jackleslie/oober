@@ -16,7 +16,13 @@ import {
   Alert,
   TextInput,
 } from 'react-native'
-import { WebBrowser, MapView, Location } from 'expo'
+import {
+  WebBrowser,
+  MapView,
+  Location,
+  Permissions,
+  IntentLauncherAndroid,
+} from 'expo'
 import MapViewDirections from 'react-native-maps-directions'
 
 import Profile from '../components/Profile'
@@ -34,19 +40,16 @@ export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props)
 
-    LATITUDE = 37.762009
-    LONGITUDE = -122.434677
+    this.LATITUDE = 37.762009
+    this.LONGITUDE = -122.434677
 
-    // The following line enables current location tracking, skipping it
-    // simulates a fake location
-    // this._getLocationAsync()
+    this._getLocationAsync()
 
-    this._bootstrapAsync()
     this.state = {
-      latitude: LATITUDE,
-      longitude: LONGITUDE,
-      endLatitude: LATITUDE - 0.01,
-      endLongitude: LONGITUDE - 0.01,
+      latitude: this.LATITUDE,
+      longitude: this.LONGITUDE,
+      endLatitude: this.LATITUDE - 0.01,
+      endLongitude: this.LONGITUDE - 0.01,
       address: null,
       endAddress: null,
       refreshing: false,
@@ -54,8 +57,8 @@ export default class HomeScreen extends React.Component {
       requestEstimate: null,
       request: null,
       driverLocation: new MapView.AnimatedRegion({
-        latitude: LATITUDE,
-        longitude: LONGITUDE,
+        latitude: this.LATITUDE,
+        longitude: this.LONGITUDE,
       }),
       receipt: null,
       inCar: false,
@@ -106,11 +109,12 @@ export default class HomeScreen extends React.Component {
   }
 
   _getLocationAsync = async () => {
+    await Permissions.askAsync(Permissions.LOCATION)
     Location.getCurrentPositionAsync({})
       .then(location => {
         this.setState({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
+          latitude: this.LATITUDE,
+          longitude: this.LONGITUDE,
           locationAllowed: true,
         })
         return this._getLocationNameAsync()
@@ -702,8 +706,12 @@ export default class HomeScreen extends React.Component {
       <LocationAccess
         refreshing={this.state.refreshing}
         handleRefresh={this._onRefresh}
-        handleLink={() =>
-          Platform.OS === 'ios' && Linking.openURL('app-settings:')
+        handleLink={async () =>
+          Platform.OS === 'ios'
+            ? await Linking.openURL('app-settings:')
+            : await IntentLauncherAndroid.startActivityAsync(
+                IntentLauncherAndroid.ACTION_APPLICATION_SETTINGS
+              )
         }
       />
     )

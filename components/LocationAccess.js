@@ -16,6 +16,7 @@ const LocationAccess = ({ refreshing, handleRefresh, handleLink }) => (
     <Text style={styles.link} onPress={handleLink}>
       Settings
     </Text>
+    <Text> and refresh</Text>
   </ScrollView>
 )
 
