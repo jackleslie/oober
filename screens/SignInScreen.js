@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native'
 import { AuthSession } from 'expo'
+import { UBER_CLIENT_ID, UBER_CLIENT_SECRET } from 'react-native-dotenv'
 
 export default class SignInScreen extends React.Component {
   static navigationOptions = {
@@ -24,7 +25,7 @@ export default class SignInScreen extends React.Component {
   handleUberLogin = async () => {
     let redirectUrl = AuthSession.getRedirectUrl()
     let results = await AuthSession.startAsync({
-      authUrl: `https://login.uber.com/oauth/v2/authorize?response_type=code&client_id=jloIvMctI2Pnd3lbrKNpqpDiSfJD8SPk&scope=profile+history+request+request_receipt&redirect_uri=${encodeURIComponent(
+      authUrl: `https://login.uber.com/oauth/v2/authorize?response_type=code&client_id=${UBER_CLIENT_ID}&scope=profile+history+request+request_receipt&redirect_uri=${encodeURIComponent(
         redirectUrl
       )}`,
     })
@@ -35,8 +36,8 @@ export default class SignInScreen extends React.Component {
         method: 'post',
         url: 'https://login.uber.com/oauth/v2/token',
         params: {
-          client_id: 'jloIvMctI2Pnd3lbrKNpqpDiSfJD8SPk',
-          client_secret: 'rXXX5JKsN9dsRtw59ynoWM9TbSlBGNHPXPuDwoCE',
+          client_id: UBER_CLIENT_ID,
+          client_secret: UBER_CLIENT_SECRET,
           grant_type: 'authorization_code',
           redirect_uri: redirectUrl,
           code: results.params.code,

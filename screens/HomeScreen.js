@@ -24,6 +24,7 @@ import {
   IntentLauncherAndroid,
 } from 'expo'
 import MapViewDirections from 'react-native-maps-directions'
+import { GOOGLE_API_KEY } from 'react-native-dotenv'
 
 import Profile from '../components/Profile'
 import Product from '../components/Product'
@@ -498,7 +499,7 @@ export default class HomeScreen extends React.Component {
             <MapViewDirections
               origin={location}
               destination={endLocation}
-              apikey="AIzaSyAAC1h8dkCQCYZ5hLa8Z5Afkvep9AJ4kFk"
+              apikey={GOOGLE_API_KEY}
               resetOnChange={false}
             />
           )}
@@ -507,7 +508,7 @@ export default class HomeScreen extends React.Component {
               <MapViewDirections
                 origin={driverLocation}
                 destination={endLocation}
-                apikey="AIzaSyAAC1h8dkCQCYZ5hLa8Z5Afkvep9AJ4kFk"
+                apikey={GOOGLE_API_KEY}
                 resetOnChange={false}
               />
             )}
@@ -515,7 +516,7 @@ export default class HomeScreen extends React.Component {
             <MapViewDirections
               origin={driverLocation}
               destination={location}
-              apikey="AIzaSyAAC1h8dkCQCYZ5hLa8Z5Afkvep9AJ4kFk"
+              apikey={GOOGLE_API_KEY}
               resetOnChange={false}
             />
           )}
